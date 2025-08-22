@@ -1,0 +1,185 @@
+.container h1 {
+  color: var(--color-primary);
+}
+
+.error {
+  color: var(--color-tangerine-dark);
+  font-weight: 600;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGroup label {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.formGroup input,
+.formGroup select {
+  padding: 0.8rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  font-family: inherit;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.formMessageError {
+  color: var(--color-tangerine-dark);
+  text-align: center;
+  margin: 1rem 0 0 0;
+}
+
+.formMessageSuccess {
+  color: var(--color-mint-dark);
+  text-align: center;
+  margin: 1rem 0 0 0;
+}
+
+.submitButton {
+  margin-top: 1.5rem;
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-weight: 700;
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.submitButton:disabled {
+  background-color: #a0a0a0;
+}
+
+.userList {
+  margin-top: 2rem;
+}
+
+.userTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.userTable th,
+.userTable td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.userTable th {
+  font-weight: 700;
+}
+
+.userTable tbody tr:hover {
+  background-color: var(--color-background);
+}
+
+.avatarCell {
+  padding-right: 0 !important;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-start;
+}
+
+.manageButton,
+.deleteButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: white;
+  text-decoration: none;
+}
+
+.manageButton {
+  background-color: var(--color-orange);
+}
+.manageButton:hover {
+  background-color: var(--color-orange-dark);
+}
+
+.deleteButton {
+  background-color: var(--color-tangerine-dark);
+}
+.deleteButton:hover {
+  background-color: #a11206;
+}
+
+@media (max-width: 768px) {
+  .userTable thead {
+    display: none;
+  }
+
+  .userTable tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    background-color: var(--color-surface);
+  }
+
+  .userTable td {
+    display: block;
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+    border-bottom: 1px dashed var(--color-border);
+    overflow-wrap: break-word;
+  }
+
+  .userTable td:last-child {
+    border-bottom: none;
+    padding-top: 1rem;
+  }
+
+  .userTable td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 1rem;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: bold;
+  }
+  
+  .avatarCell {
+    display: none; /* Esconde o avatar no layout de card móvel para economizar espaço */
+  }
+
+  .actionButtons {
+    justify-content: flex-end; /* Alinha botões à direita no mobile */
+  }
+}

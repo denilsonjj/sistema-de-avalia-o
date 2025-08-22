@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Encode+Sans+Expanded:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+:root {
+  /* Cores Principais */
+  --color-primary: #243782;
+  --color-text-on-primary: #ffffff;
+  
+  /* Cores de Texto e Fundo */
+  --color-background: #f4f7f6; 
+  --color-surface: #ffffff; 
+  --color-text: #282b34; 
+  --color-border: #dce1e6; 
+
+  /* Cores Secundárias (do guia de identidade) */
+  --color-tangerine: #ec94a2;
+  --color-tangerine-light: #f39671;
+  --color-tangerine-dark: #e42313;
+
+  --color-mint: #43aaa0;
+  --color-mint-light: #a0d4cd;
+  --color-mint-dark: #006a6a;
+
+  --color-orange: #eca935;
+  --color-orange-light: #ffcd50;
+  --color-orange-dark: #ef7800;
+
+  --color-anthracite: #282b34;
+}
+
+body {
+  margin: 0;
+  font-family: 'Encode Sans Expanded', sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+:root {
+ 
+  --color-primary: #243782;
+  --color-text-on-primary: #ffffff;
+  --color-background: #f4f7f6;
+  --color-surface: #ffffff;
+  --color-text: #282b34;
+  --color-border: #dce1e6;
+ 
+}
+
+/* Tema Escuro */
+body[data-theme='dark'] {
+  --color-primary: #5a7ec7; /* Um azul um pouco mais claro para contraste */
+  --color-text-on-primary: #ffffff;
+  --color-background: #121212;
+  --color-surface: #1e2129;
+  --color-text: #e1e1e1;
+  --color-border: #313642;
+}
+
+body {
+  margin: 0;
+  font-family: 'Encode Sans Expanded', sans-serif;
+  /* Transição suave de cores */
+  transition: background-color 0.3s, color 0.3s;
+
+  /* Aplica as variáveis */
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
