@@ -12,9 +12,9 @@ function TechnicianDashboardPage() {
   const { user } = useAuth();
   const [latestEvaluation, setLatestEvaluation] = useState(null);
   const [goals, setGoals] = useState([]);
-  const [oeeData, setOeeData] = useState(null); // Estado para os dados de OEE
+  const [oeeData, setOeeData] = useState(null); 
   const [loading, setLoading] = useState(true);
-
+  const [lines, setLines] = useState([]); // Estado para as linhas associadas ao técnico
   const firstName = user?.name ? user.name.split(' ')[0] : 'Usuário';
 
   useEffect(() => {
@@ -25,7 +25,8 @@ function TechnicianDashboardPage() {
         const [evalRes, goalsRes, oeeRes] = await Promise.all([
           api.get(`/evaluations/user/${user.userId}`),
           api.get(`/goals/user/${user.userId}`),
-          api.get(`/oee/user/${user.userId}`) // Nova chamada para buscar OEE
+          api.get(`/oee/user/${user.userId}`) ,
+          api.get(`/oee/lines/overview`)
         ]);
 
         if (evalRes.data && evalRes.data.length > 0) {
@@ -39,13 +40,16 @@ function TechnicianDashboardPage() {
             const avgPerformance = oeeRes.data.reduce((sum, item) => sum + item.performance, 0) / oeeRes.data.length;
             const avgQuality = oeeRes.data.reduce((sum, item) => sum + item.quality, 0) / oeeRes.data.length;
             const overallOee = (avgAvailability / 100) * (avgPerformance / 100) * (avgQuality / 100);
-
+            const lineNAmes = oeeRes.data.map(lines => lines.lineName).join(', ');
             setOeeData({
                 availability: avgAvailability,
                 performance: avgPerformance,
                 quality: avgQuality,
                 oee: overallOee * 100
             });
+
+            setLines(lineNAmes);
+            console.log(lineNAmes);
         }
 
       } catch (error) {
@@ -72,7 +76,7 @@ function TechnicianDashboardPage() {
       {/* Seção de KPIs de OEE */}
       {oeeData && (
         <div className={styles.kpiGrid}>
-            <Card>
+           {/* <Card>
                 <div className={styles.kpiCard} style={{borderColor: 'var(--color-primary)'}}>
                     <div className={styles.kpiValue}>{oeeData.oee.toFixed(1)}%</div>
                     <div className={styles.kpiLabel}>Meu OEE</div>
@@ -83,11 +87,11 @@ function TechnicianDashboardPage() {
                     <div className={styles.kpiValue}>{oeeData.availability.toFixed(1)}%</div>
                     <div className={styles.kpiLabel}>Disponibilidade</div>
                 </div>
-            </Card>
+            </Card>*/}
             <Card>
                  <div className={styles.kpiCard} style={{borderColor: 'var(--color-orange)'}}>
                     <div className={styles.kpiValue}>{oeeData.performance.toFixed(1)}%</div>
-                    <div className={styles.kpiLabel}>Performance</div>
+                    <div className={styles.kpiLabel}>Performance média das linhas</div>
                 </div>
             </Card>
             <Card>

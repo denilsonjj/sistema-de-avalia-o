@@ -10,7 +10,6 @@ function TeamDashboardPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -52,7 +51,7 @@ function TeamDashboardPage() {
           </thead>
           <tbody>
             {users.map(user => {
-              // Verifica se existe uma avaliação e formata a data
+             
               const lastEvaluation = user.evaluations?.[0]?.createdAt;
               const formattedDate = lastEvaluation 
                 ? new Date(lastEvaluation).toLocaleDateString('pt-BR') 

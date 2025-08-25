@@ -1,11 +1,10 @@
-// frontend/src/pages/ProfilePage/ProfilePage.jsx
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/Card/Card';
-import Avatar from '../../components/Avatar/Avatar'; // Importando o Avatar
+import Avatar from '../../components/Avatar/Avatar'; 
 import styles from './ProfilePage.module.css';
-import { FaUser, FaEnvelope, FaTools, FaCertificate, FaSave } from 'react-icons/fa'; // Importando ícones
+import { FaUser, FaEnvelope, FaTools, FaCertificate, FaSave } from 'react-icons/fa'; 
 
 function ProfilePage() {
   const { user } = useAuth();

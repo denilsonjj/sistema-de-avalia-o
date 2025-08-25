@@ -1,14 +1,14 @@
-// frontend/src/pages/AssignGoalPage/AssignGoalPage.jsx
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import DatePicker from 'react-datepicker'; // Importe o DatePicker
+import DatePicker from 'react-datepicker'; 
 import { registerLocale } from  "react-datepicker";
-import ptBR from 'date-fns/locale/pt-BR'; // Importe a localização em português
+import ptBR from 'date-fns/locale/pt-BR'; 
 import api from '../../services/api';
 import Card from '../../components/Card/Card';
 import styles from './AssignGoalPage.module.css';
 
-registerLocale('pt-BR', ptBR); // Registra o português para o calendário
+registerLocale('pt-BR', ptBR); 
 
 function AssignGoalPage() {
   const { userId } = useParams();

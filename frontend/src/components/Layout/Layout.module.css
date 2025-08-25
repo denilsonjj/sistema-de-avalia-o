@@ -1,4 +1,4 @@
-/* frontend/src/components/Layout/Layout.module.css */
+
 .layout {
   display: grid;
   grid-template-columns: 240px 1fr;
@@ -12,7 +12,6 @@
   transition: grid-template-columns 0.3s ease-in-out;
 }
 
-/* Estilo para quando a sidebar está recolhida no desktop */
 .layout.sidebarCollapsed {
   grid-template-columns: 80px 1fr;
 }
@@ -28,7 +27,7 @@
   display: none;
 }
 
-/* Estilos para Telas Menores (Tablets e Celulares) */
+
 @media (max-width: 768px) {
   .layout {
     grid-template-columns: 1fr;
@@ -37,7 +36,7 @@
       "main";
   }
 
-  /* O overlay é um fundo escuro que aparece atrás do menu aberto no mobile */
+
   .overlay {
     position: fixed;
     top: 0;

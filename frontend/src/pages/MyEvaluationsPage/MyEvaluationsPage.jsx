@@ -62,9 +62,9 @@ function MyEvaluationsPage() {
               title={`Avaliação de ${new Date(evaluation.createdAt).toLocaleDateString()}`}
             >
               <div className={styles.cardActions}>
-                <Link to={`/avaliacoes/${evaluation.id}/editar`} className={styles.editButton}>
+               {/*<Link to={`/avaliacoes/${evaluation.id}/editar`} className={styles.editButton}>
                   Editar
-                </Link>
+                </Link>*/ } 
                 <button onClick={() => handleDelete(evaluation.id)} className={styles.deleteButton}>Excluir</button>
               </div>
 

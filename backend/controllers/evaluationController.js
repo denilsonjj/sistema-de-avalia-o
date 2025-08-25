@@ -1,8 +1,8 @@
-// backend/controllers/evaluationController.js
+
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Criar uma nova avaliação
+
 exports.createEvaluation = async (req, res) => {
   const { userId } = req.params;
   const data = req.body; // O body agora terá os campos com _score e _notes
@@ -32,10 +32,12 @@ exports.updateEvaluation = async (req, res) => {
     res.status(200).json(updatedEvaluation);
   } catch (error) {
     res.status(500).json({ message: 'Erro ao atualizar avaliação.', error: error.message });
-  }
+  }      
 };
 
-// Buscar todas as avaliações de um usuário
+
+
+
 exports.getEvaluationsByUser = async (req, res) => {
   const { userId } = req.params;
   try {

@@ -1,11 +1,10 @@
-// frontend/src/main.jsx
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import App from './App.jsx';
 import LoginPage from './pages/LoginPage.jsx';
-// import DashboardPage from './pages/DashboardPage.jsx'; // Não precisamos mais deste import direto
 import DashboardRouter from './pages/DashboardRouter.jsx'; // Importe o Roteador
 import TeamDashboardPage from './pages/TeamDashboardPage/TeamDashboardPage.jsx';
 import EvaluationDetailPage from './pages/EvaluationDetailPage/EvaluationDetailPage.jsx';
@@ -22,7 +21,6 @@ import ReportsPage from './pages/ReportsPage/ReportsPage';
 import AssignGoalPage from './pages/AssignGoalPage/AssignGoalPage.jsx';
 import ManageUserLinesPage from './pages/ManageUserLinesPage/ManageUserLinesPage.jsx';
 import 'react-datepicker/dist/react-datepicker.css';
-
 import './index.css';
 
 const router = createBrowserRouter([

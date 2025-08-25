@@ -1,4 +1,3 @@
-// frontend/src/components/charts/UsersByRoleDonutChart.jsx
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 

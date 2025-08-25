@@ -1,4 +1,3 @@
-// frontend/src/pages/CreateEvaluationPage/CreateEvaluationPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Select from 'react-select';
@@ -15,7 +14,7 @@ const scoreOptions = [
   { value: 5, label: '5 - Excepcional' },
 ];
 
-// Estilos customizados para o React Select que se adaptam ao tema
+
 const customSelectStyles = (theme) => ({
   control: (provided) => ({
     ...provided,
@@ -150,7 +149,7 @@ function CreateEvaluationPage() {
           </div>
         </Card>
 
-        <Card title="Indicadores de OEE (%)">
+        {/*<Card title="Indicadores de OEE (%)">
             <div className={styles.scoreGrid}>
                 <div className={styles.formGroup}>
                     <label htmlFor="availability">Disponibilidade (A):</label>
@@ -165,7 +164,7 @@ function CreateEvaluationPage() {
                     <input type="number" id="quality" name="quality" value={formData.quality} onChange={handleChange} required />
                 </div>
             </div>
-        </Card>
+        </Card>*/}
         
         {error && <p className={styles.error}>{error}</p>}
         

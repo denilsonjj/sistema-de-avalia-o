@@ -1,9 +1,8 @@
-// frontend/src/components/charts/CompetencyRadarChart.jsx
 import React from 'react';
 import { Radar, RadarChart, PolarGrid, Legend, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 
 function CompetencyRadarChart({ evaluationData }) {
-  // Transforma os dados da avaliação para o formato que o gráfico precisa
+
   const chartData = [
     { subject: 'Qualidade', score: evaluationData.serviceQuality_score, fullMark: 5 },
     { subject: 'Iniciativa', score: evaluationData.problemSolvingInitiative_score, fullMark: 5 },

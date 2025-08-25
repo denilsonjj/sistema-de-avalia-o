@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -7,20 +7,15 @@ import {
   useSensors,
   closestCorners,
   useDroppable,
-} from '@dnd-kit/core';
-import {
-  SortableContext,
-  useSortable,
-  arrayMove,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import api from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
-import styles from './GoalsPage.module.css';
-
-// --- COMPONENTES INTERNOS ---
-
-function TaskCard({ goal }) {
+} from "@dnd-kit/core";
+import { SortableContext, useSortable, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
+import styles from "./GoalsPage.module.css";
+import { FaTrashAlt } from "react-icons/fa";
+// Componente TaskCard atualizado com o botão de deletar
+function TaskCard({ goal, onDelete }) {
   const {
     attributes,
     listeners,
@@ -44,14 +39,30 @@ function TaskCard({ goal }) {
       {...listeners}
       className={styles.goalCard}
     >
-      <p>{goal.title}</p>
-      <small>Criado por: {goal.author.name}</small>
-    </div>
+      <div>
+        <p>{goal.title}</p>
+        <small>Criado por: {goal.author.name}</small>
+      </div>
+      <div>
+       <button
+        onClick={(e) => {
+          e.stopPropagation(); // Impede o clique de ativar o drag-and-drop
+          onDelete(goal.id);
+        }}
+        className={styles.deleteButton} // Adicione estilo para este botão no seu CSS
+        title="Deletar meta"
+      >
+        <FaTrashAlt />
+      </button>
+    </div> 
+      </div>
+      
   );
 }
 
-function Column({ id, title, goals }) {
-  const { setNodeRef } = useDroppable({ id }); // 🔴 Torna a coluna "droppable"
+// Componente Column atualizado para passar a função 'onDelete'
+function Column({ id, title, goals, onDelete }) {
+  const { setNodeRef } = useDroppable({ id });
 
   return (
     <div ref={setNodeRef} className={styles.column}>
@@ -59,7 +70,7 @@ function Column({ id, title, goals }) {
       <SortableContext items={goals.map((g) => g.id)}>
         <div className={styles.cardList}>
           {goals.map((goal) => (
-            <TaskCard key={goal.id} goal={goal} />
+            <TaskCard key={goal.id} goal={goal} onDelete={onDelete} />
           ))}
         </div>
       </SortableContext>
@@ -76,7 +87,7 @@ function GoalsPage() {
     EM_ANDAMENTO: [],
     CONCLUIDA: [],
   });
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeGoal, setActiveGoal] = useState(null);
 
@@ -91,12 +102,13 @@ function GoalsPage() {
     try {
       const res = await api.get(`/goals/user/${user.userId}`);
       setColumns({
-        PENDENTE: res.data.filter((g) => g.status === 'PENDENTE'),
-        EM_ANDAMENTO: res.data.filter((g) => g.status === 'EM_ANDAMENTO'),
-        CONCLUIDA: res.data.filter((g) => g.status === 'CONCLUIDA'),
+        PENDENTE: res.data.filter((g) => g.status === "PENDENTE"),
+        EM_ANDAMENTO: res.data.filter((g) => g.status === "EM_ANDAMENTO"),
+        CONCLUIDA: res.data.filter((g) => g.status === "CONCLUIDA"),
+        DELETE: res.data.filter((g) => g.status === "DELETE"),
       });
     } catch (error) {
-      console.error('Erro ao buscar metas:', error);
+      console.error("Erro ao buscar metas:", error);
     } finally {
       setLoading(false);
     }
@@ -109,9 +121,20 @@ function GoalsPage() {
   const handleCreateGoal = async (e) => {
     e.preventDefault();
     if (!title.trim()) return;
-    await api.post('/goals', { userId: user.userId, title });
-    setTitle('');
+    await api.post("/goals", { userId: user.userId, title });
+    setTitle("");
     fetchGoals();
+  };
+
+  const handleDeleteGoal = async (goalId) => {
+    if (window.confirm("Tem certeza que deseja deletar esta meta?")) {
+      try {
+        await api.delete(`/goals/${goalId}`);
+        fetchGoals(); // Recarrega as metas do servidor
+      } catch (error) {
+        console.error("Erro ao deletar a meta:", error);
+      }
+    }
   };
 
   const findContainer = (id) => {
@@ -173,9 +196,7 @@ function GoalsPage() {
         const [movedItem] = activeItems.splice(activeIndex, 1);
         movedItem.status = newStatus;
 
-        const overIndex = overItems.findIndex(
-          (item) => item.id === overId
-        );
+        const overIndex = overItems.findIndex((item) => item.id === overId);
 
         if (overIndex === -1) {
           overItems.push(movedItem);
@@ -193,16 +214,16 @@ function GoalsPage() {
   };
 
   const columnTitles = {
-    PENDENTE: '📋 A Fazer',
-    EM_ANDAMENTO: '⏳ Em Andamento',
-    CONCLUIDA: '✔️ Concluído',
+    PENDENTE: "📋 A Fazer",
+    EM_ANDAMENTO: "⏳ Em Andamento",
+    CONCLUIDA: "✔️ Concluído",
   };
 
   if (loading) return <p>Carregando metas...</p>;
 
   return (
     <div>
-      <h1>Plano de Desenvolvimento</h1>
+      <h1 className="titlePage">Plano de Desenvolvimento</h1>
 
       <div className={styles.formCard}>
         <form onSubmit={handleCreateGoal}>
@@ -222,21 +243,22 @@ function GoalsPage() {
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
       >
-        <SortableContext items={Object.keys(columns)}>
-          <div className={styles.board}>
-            {Object.entries(columnTitles).map(([status, title]) => (
-              <Column
-                key={status}
-                id={status}
-                title={title}
-                goals={columns[status]}
-              />
-            ))}
-          </div>
-        </SortableContext>
+        <div className={styles.board}>
+          {Object.entries(columnTitles).map(([status, title]) => (
+            <Column
+              key={status}
+              id={status}
+              title={title}
+              goals={columns[status]}
+              onDelete={handleDeleteGoal} // Passando a função para a coluna
+            />
+          ))}
+        </div>
 
         <DragOverlay>
-          {activeGoal ? <TaskCard goal={activeGoal} /> : null}
+          {activeGoal ? (
+            <TaskCard goal={activeGoal} onDelete={() => {}} />
+          ) : null}
         </DragOverlay>
       </DndContext>
     </div>

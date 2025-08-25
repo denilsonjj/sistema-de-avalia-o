@@ -3,7 +3,7 @@ import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from '
 
 
 const getColor = (value) => {
-  if (value >= 85) return '#43aaa0'; 
+  if (value >= 85) return '#243782'; 
   if (value >= 70) return '#eca935'; 
   return '#e42313'; 
 };

@@ -1,11 +1,10 @@
-// backend/controllers/goalController.js
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 // Criar nova meta
 exports.createGoal = async (req, res) => {
   const { userId, title, description, dueDate } = req.body;
-  const authorId = req.user.userId; // Autor é quem está logado
+  const authorId = req.user.userId; 
 
   try {
     const goal = await prisma.goal.create({
@@ -32,10 +31,9 @@ exports.getGoalsForUser = async (req, res) => {
   }
 };
 
-// Atualizar status de uma meta
 exports.updateGoalStatus = async (req, res) => {
     const { id } = req.params;
-    const { status } = req.body; // PENDENTE, EM_ANDAMENTO, CONCLUIDA
+    const { status } = req.body; 
     try {
         const updatedGoal = await prisma.goal.update({
             where: { id },
@@ -46,3 +44,14 @@ exports.updateGoalStatus = async (req, res) => {
         res.status(500).json({ message: 'Erro ao atualizar status da meta.' });
     }
 };
+
+// deletar meta
+exports.deleteGoal = async (req, res) => {
+    const { id } = req.params;
+    try {
+        await prisma.goal.delete({ where: { id } });
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao deletar meta.' });
+    }
+}

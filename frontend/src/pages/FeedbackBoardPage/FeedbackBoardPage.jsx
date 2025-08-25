@@ -1,10 +1,9 @@
-// frontend/src/pages/FeedbackBoardPage/FeedbackBoardPage.jsx
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import Card from '../../components/Card/Card';
 import Avatar from '../../components/Avatar/Avatar';
 import styles from './FeedbackBoardPage.module.css';
-import { FaQuoteLeft, FaPaperPlane } from 'react-icons/fa'; // Importando ícones
+import { FaQuoteLeft, FaPaperPlane } from 'react-icons/fa'; 
 
 function FeedbackBoardPage() {
   const [users, setUsers] = useState([]);
@@ -16,7 +15,7 @@ function FeedbackBoardPage() {
 
   useEffect(() => {
     api.get('/auth/users').then(res => {
-      // Ordena os usuários por nome
+      
       const sortedUsers = res.data.sort((a, b) => a.name.localeCompare(b.name));
       setUsers(sortedUsers);
     });

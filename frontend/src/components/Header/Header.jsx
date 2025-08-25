@@ -1,4 +1,3 @@
-// frontend/src/components/Header/Header.jsx
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';

@@ -1,4 +1,3 @@
-// frontend/src/components/Avatar/Avatar.jsx
 import React from 'react';
 import styles from './Avatar.module.css';
 

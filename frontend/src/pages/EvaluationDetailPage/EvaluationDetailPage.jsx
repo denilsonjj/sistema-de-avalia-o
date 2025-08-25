@@ -11,7 +11,7 @@ function EvaluationDetailPage() {
   const [user, setUser] = useState(null);
   const [evaluations, setEvaluations] = useState([]);
   const [goals, setGoals] = useState([]);
-  const [oeeData, setOeeData] = useState(null); // Estado para o OEE real
+  const [oeeData, setOeeData] = useState(null); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -24,7 +24,7 @@ function EvaluationDetailPage() {
           api.get(`/auth/users/${userId}`),
           api.get(`/evaluations/user/${userId}`),
           api.get(`/goals/user/${userId}`),
-          api.get(`/oee/user/${userId}`) // Busca os dados de OEE pré-calculados
+          api.get(`/oee/user/${userId}`) 
         ]);
         
         setUser(userRes.data);
@@ -108,7 +108,6 @@ function EvaluationDetailPage() {
             </div>
         )}
 
-        {/* Radar Chart e Detalhes (só aparecem se houver uma avaliação manual) */}
         {latestEvaluation ? (
           <>
             <div className={`${styles.largeCard} ${styles.radarCard}`}>

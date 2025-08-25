@@ -24,6 +24,7 @@ enum Status {
   PENDENTE
   EM_ANDAMENTO
   CONCLUIDA
+  DELETE
 }
 
 // --- NOVOS MODELOS E RELAÇÕES ---
@@ -115,7 +116,7 @@ model Goal {
   description String?
   dueDate     DateTime?
   status      Status    @default(PENDENTE)
-
+  
   user   User   @relation("UserGoals", fields: [userId], references: [id])
   userId String
 

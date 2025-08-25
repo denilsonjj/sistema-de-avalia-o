@@ -1,10 +1,9 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Criar novo feedback
 exports.createFeedback = async (req, res) => {
   const { recipientId, content } = req.body;
-  const authorId = req.user.userId; // ID do autor vem do token JWT
+  const authorId = req.user.userId; 
 
   try {
     const feedback = await prisma.feedback.create({
@@ -28,7 +27,7 @@ exports.getFeedbacksForUser = async (req, res) => {
       where: { recipientId: userId },
       orderBy: { createdAt: 'desc' },
       include: {
-        author: { // Inclui o nome do autor do feedback
+        author: { 
           select: { name: true },
         },
       },

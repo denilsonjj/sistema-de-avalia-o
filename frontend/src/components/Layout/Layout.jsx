@@ -1,4 +1,3 @@
-// frontend/src/components/Layout/Layout.jsx
 import React, { useState } from 'react';
 import Header from '../Header/Header';
 import Sidebar from '../Sidebar/Sidebar';
