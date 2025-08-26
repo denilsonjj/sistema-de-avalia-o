@@ -5,6 +5,13 @@ import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/Card/Card';
 import styles from './MyEvaluationsPage.module.css';
 
+// 1. Importações necessárias para o modal
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+// 2. Instância do SweetAlert (criada fora do componente para melhor performance)
+const MySwal = withReactContent(Swal);
+
 function MyEvaluationsPage() {
   const [evaluations, setEvaluations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,17 +35,39 @@ function MyEvaluationsPage() {
     fetchEvaluations();
   }, [user]);
 
-  // Função para lidar com a exclusão
-  const handleDelete = async (evaluationId) => {
-    if (window.confirm('Tem certeza que deseja excluir esta avaliação? Esta ação não pode ser desfeita.')) {
-      try {
-        await api.delete(`/evaluations/${evaluationId}`);
-        // Atualiza a lista na tela sem precisar recarregar
-        setEvaluations(prev => prev.filter(ev => ev.id !== evaluationId));
-      } catch (err) {
-        alert('Erro ao excluir avaliação.');
+  // 3. Função de deletar ATUALIZADA com o modal
+  const handleDelete = (evaluationId) => {
+    MySwal.fire({
+      title: 'Tem certeza?',
+      text: 'Esta avaliação será excluída permanentemente!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sim, excluir!',
+      cancelButtonText: 'Cancelar'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await api.delete(`/evaluations/${evaluationId}`);
+          // Atualiza a lista na tela sem precisar recarregar
+          setEvaluations(prev => prev.filter(ev => ev.id !== evaluationId));
+
+          MySwal.fire(
+            'Excluída!',
+            'A avaliação foi removida com sucesso.',
+            'success'
+          );
+        } catch (err) {
+          console.error("Erro ao excluir avaliação:", err);
+          MySwal.fire(
+            'Erro!',
+            'Não foi possível excluir a avaliação.',
+            'error'
+          );
+        }
       }
-    }
+    });
   };
 
   if (loading) {
@@ -62,9 +91,7 @@ function MyEvaluationsPage() {
               title={`Avaliação de ${new Date(evaluation.createdAt).toLocaleDateString()}`}
             >
               <div className={styles.cardActions}>
-               {/*<Link to={`/avaliacoes/${evaluation.id}/editar`} className={styles.editButton}>
-                  Editar
-                </Link>*/ } 
+                {/* O botão agora chama a nova função handleDelete */}
                 <button onClick={() => handleDelete(evaluation.id)} className={styles.deleteButton}>Excluir</button>
               </div>
 
@@ -79,7 +106,7 @@ function MyEvaluationsPage() {
                   <p><strong>Qualidade do Serviço (Nota):</strong> {evaluation.serviceQuality_score}</p>
                   <p><strong>Iniciativa (Nota):</strong> {evaluation.problemSolvingInitiative_score}</p>
                 </div>
-                 <div>
+                  <div>
                   <h4>Avaliação Comportamental</h4>
                   <p><strong>Trabalho em Equipe (Nota):</strong> {evaluation.teamwork_score}</p>
                   <p><strong>Comprometimento (Nota):</strong> {evaluation.commitment_score}</p>
@@ -89,7 +116,7 @@ function MyEvaluationsPage() {
           ))
         ) : (
           <Card title="Nenhuma avaliação encontrada">
-            <p>Você ainda não possui avaliações registradas.</p>
+            <p style={{textAlign:'center'}}>Você ainda não possui avaliações registradas.</p>
           </Card>
         )}
       </div>

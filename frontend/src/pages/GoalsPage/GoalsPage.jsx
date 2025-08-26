@@ -14,7 +14,11 @@ import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./GoalsPage.module.css";
 import { FaTrashAlt } from "react-icons/fa";
-// Componente TaskCard atualizado com o botão de deletar
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+
+const MySwal = withReactContent(Swal);
 function TaskCard({ goal, onDelete }) {
   const {
     attributes,
@@ -46,10 +50,10 @@ function TaskCard({ goal, onDelete }) {
       <div>
        <button
         onClick={(e) => {
-          e.stopPropagation(); // Impede o clique de ativar o drag-and-drop
+          e.stopPropagation(); 
           onDelete(goal.id);
         }}
-        className={styles.deleteButton} // Adicione estilo para este botão no seu CSS
+        className={styles.deleteButton}
         title="Deletar meta"
       >
         <FaTrashAlt />
@@ -126,15 +130,45 @@ function GoalsPage() {
     fetchGoals();
   };
 
-  const handleDeleteGoal = async (goalId) => {
-    if (window.confirm("Tem certeza que deseja deletar esta meta?")) {
-      try {
-        await api.delete(`/goals/${goalId}`);
-        fetchGoals(); // Recarrega as metas do servidor
-      } catch (error) {
-        console.error("Erro ao deletar a meta:", error);
+  const handleDeleteGoal = (goalId) => {
+    MySwal.fire({
+      title: 'Tem certeza?',
+      text: "Esta meta será apagada permanentemente!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sim, apagar!',
+      cancelButtonText: 'Cancelar'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await api.delete(`/goals/${goalId}`);
+          
+          // Atualiza o estado localmente para uma UI mais rápida
+          const containerKey = findContainer(goalId);
+          if (containerKey) {
+            setColumns(prevColumns => ({
+              ...prevColumns,
+              [containerKey]: prevColumns[containerKey].filter(goal => goal.id !== goalId)
+            }));
+          }
+
+          MySwal.fire(
+            'Apagada!',
+            'A meta foi removida.',
+            'success'
+          );
+        } catch (error) {
+          console.error("Erro ao deletar a meta:", error);
+          MySwal.fire(
+            'Erro!',
+            'Não foi possível apagar a meta.',
+            'error'
+          );
+        }
       }
-    }
+    });
   };
 
   const findContainer = (id) => {
