@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../../services/api';
@@ -11,7 +10,7 @@ function EvaluationDetailPage() {
   const [user, setUser] = useState(null);
   const [evaluations, setEvaluations] = useState([]);
   const [goals, setGoals] = useState([]);
-  const [oeeData, setOeeData] = useState(null); 
+  const [oeeData, setOeeData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -20,31 +19,37 @@ function EvaluationDetailPage() {
       setLoading(true);
       setError('');
       try {
-        const [userRes, evalRes, goalsRes, oeeRes] = await Promise.all([
+        // 1. REMOVIDA a chamada para /oee/user/${userId} daqui
+        const [userRes, evalRes, goalsRes] = await Promise.all([
           api.get(`/auth/users/${userId}`),
           api.get(`/evaluations/user/${userId}`),
           api.get(`/goals/user/${userId}`),
-          api.get(`/oee/user/${userId}`) 
         ]);
-        
+
         setUser(userRes.data);
         setEvaluations(evalRes.data);
         setGoals(goalsRes.data);
 
-        // Calcula a média de OEE se o usuário tiver múltiplas linhas
-        if (oeeRes.data && oeeRes.data.length > 0) {
-            const avgAvailability = oeeRes.data.reduce((sum, item) => sum + item.availability, 0) / oeeRes.data.length;
-            const avgPerformance = oeeRes.data.reduce((sum, item) => sum + item.performance, 0) / oeeRes.data.length;
-            const avgQuality = oeeRes.data.reduce((sum, item) => sum + item.quality, 0) / oeeRes.data.length;
-            setOeeData({
-                availability: avgAvailability,
-                performance: avgPerformance,
-                quality: avgQuality,
-            });
+        // 2. CÁLCULO DO OEE feito a partir dos dados de avaliações (evalRes.data)
+        if (evalRes.data && evalRes.data.length > 0) {
+          const validEvals = evalRes.data; // Já temos as avaliações aqui
+          const avgPerformance = validEvals.reduce((sum, item) => sum + item.performance, 0) / validEvals.length;
+          const avgQuality = validEvals.reduce((sum, item) => sum + item.quality, 0) / validEvals.length;
+          const avgAvailability = validEvals.reduce((sum, item) => sum + item.availability, 0) / validEvals.length;
+          
+          const overallOEE = (avgAvailability / 100) * (avgPerformance / 100) * (avgQuality / 100);
+
+          setOeeData({
+            performance: avgPerformance,
+            quality: avgQuality,
+            availability: avgAvailability,
+            overall: overallOEE * 100, // Armazena o OEE final em percentual
+          });
         }
 
       } catch (err) {
-        setError('Não foi possível carregar os dados completos. Verifique se existem avaliações para este usuário.');
+        setError('Não foi possível carregar os dados completos. Verifique se o usuário possui avaliações cadastradas.');
+        console.error("Erro ao buscar dados:", err); // Adicionado para debug
       } finally {
         setLoading(false);
       }
@@ -55,11 +60,11 @@ function EvaluationDetailPage() {
   if (loading) return <p>Carregando relatório...</p>;
   if (error) return <p className={styles.error}>{error}</p>;
 
+  // A lógica para pegar a última avaliação permanece a mesma
   const latestEvaluation = evaluations[0];
   
-  // O cálculo do OEE agora usa os dados reais e pré-calculados
-  const oee = oeeData ? (oeeData.availability / 100) * (oeeData.performance / 100) * (oeeData.quality / 100) : 0;
-  const oeePercentage = (oee * 100).toFixed(2);
+  // 3. CORREÇÃO na exibição dos dados de OEE
+  const oeePercentage = oeeData ? oeeData.overall.toFixed(2) : "0.00";
 
   return (
     <div className={styles.page}>
@@ -79,20 +84,15 @@ function EvaluationDetailPage() {
       </div>
 
       <div className={styles.grid}>
-        {/* OEE Scorecard com dados reais */}
         {oeeData ? (
           <>
             <div className={styles.oeeCard}>
               <div className={styles.oeeValue}>{oeePercentage}%</div>
-              <div className={styles.oeeLabel}>OEE Real (Calculado)</div>
-            </div>
-            <div className={styles.indicatorCard}>
-              <div className={styles.indicatorLabel}>Disponibilidade (A)</div>
-              <div className={styles.indicatorValue}>{oeeData.availability.toFixed(2)}%</div>
-              <div className={styles.progressBar}><div style={{ width: `${oeeData.availability}%`, backgroundColor: '#43aaa0' }}></div></div>
+              <div className={styles.oeeLabel}>OEE Real (Média)</div>
             </div>
             <div className={styles.indicatorCard}>
               <div className={styles.indicatorLabel}>Performance (P)</div>
+              {/* Corrigido o "P" maiúsculo e a lógica da barra */}
               <div className={styles.indicatorValue}>{oeeData.performance.toFixed(2)}%</div>
               <div className={styles.progressBar}><div style={{ width: `${oeeData.performance}%`, backgroundColor: '#eca935' }}></div></div>
             </div>
@@ -108,6 +108,7 @@ function EvaluationDetailPage() {
             </div>
         )}
 
+        {/* Esta parte agora deve funcionar, pois 'latestEvaluation' receberá os dados */}
         {latestEvaluation ? (
           <>
             <div className={`${styles.largeCard} ${styles.radarCard}`}>

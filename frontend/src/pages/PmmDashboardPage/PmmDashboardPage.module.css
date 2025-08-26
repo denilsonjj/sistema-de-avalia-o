@@ -39,11 +39,11 @@
 .userTable {
   width: 100%;
   border-collapse: collapse;
-  text-align: left;
+  text-align: center;
 }
 
 .userTable th,
-.userTable td {
+.userTable td, .userTable tr {
   padding: 0.8rem 1rem;
   border-bottom: 1px solid var(--color-border);
   text-align: center;

@@ -65,8 +65,7 @@ function ReportsPage() {
   return (
     <div className={styles.container}>
       <h1>Relatórios e Exportações</h1>
-      <p>Análise de dados e extração de informações do sistema.</p>
-
+     
       {/* Seção de Exportação */}
       <Card title="Exportar Dados para Excel">
         <div className={styles.exportGrid}>

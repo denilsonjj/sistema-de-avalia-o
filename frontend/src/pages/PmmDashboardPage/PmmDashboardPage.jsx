@@ -85,20 +85,18 @@ function PmmDashboardPage() {
   return (
     <div className={styles.container}>
       <h1>Dashboard PMM - Visão Geral</h1>
-      <p>Acesso total aos dados e KPIs de produção do sistema.</p>
+     {/* <p>Acesso total aos dados e KPIs de produção do sistema.</p>*/}
       
       <div className={styles.kpiGrid}>
-        <Card title="OPE Geral">
+        <Card title="Performance Geral">
           <OeeGaugeChart value={overallAverageOee} />
         </Card>
         
         <Card title="Usuários Cadastrados">
-        {/*  <div className={styles.kpiTitle}>{stats.userCount}</div>*/}
           <UsersByRoleDonutChart data={usersByRole} />
         </Card>
 
         <Card title="Avaliações Realizadas">
-        {/*  <div className={styles.kpiTitle}>{stats.evaluationCount}</div>*/}
           <EvaluationsTrendChart data={evaluationsTrend} />
         </Card>
       </div>
@@ -139,7 +137,7 @@ function PmmDashboardPage() {
                 </tbody>
               </table>
             ) : (
-              <p>Nenhum técnico responsável encontrado para esta linha.</p>
+              <p style={{textAlign: 'center'}}>Nenhum técnico responsável encontrado para esta linha.</p>
             )}
           </Card>
         </div>
@@ -147,18 +145,17 @@ function PmmDashboardPage() {
 
       <Card title="Todos os Usuários do Sistema">
         <table className={styles.userTable}>
-          <thead>
+          <thead >
             <tr>
               <th>Nome</th>
               <th>Email</th>
-              <th>Perfil</th>
+              <th>Cargo</th>
               <th>Ações</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody style={{textAlign: 'center'}}>
             {users.map(user => (
              <tr key={user.id}>
-             <td className={styles.avatarCell}><Avatar name={user.name} /></td>
              <td data-label="Nome">{user.name}</td>
              <td data-label="Email">{user.email}</td>
              <td data-label="Perfil">{user.role}</td>

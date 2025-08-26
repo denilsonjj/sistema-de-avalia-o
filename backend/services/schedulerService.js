@@ -76,12 +76,12 @@ const updateOeeData = async () => {
     console.log('--- Tarefa agendada finalizada ---');
 };
 
-//30segundos
-//const startScheduler = () => {
-  //  cron.schedule('*/30 * * * * *', updateOeeData, {
-   //     scheduled: true
-  //  });
-//};
+/*
+const startScheduler = () => {
+   cron.schedule('*30 * * * * *', updateOeeData, {
+       scheduled: true
+  });
+};*/
 
 
 const startScheduler = () => {

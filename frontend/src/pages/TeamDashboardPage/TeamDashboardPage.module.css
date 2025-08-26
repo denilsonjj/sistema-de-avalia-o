@@ -2,6 +2,7 @@
   color: var(--color-primary);
 }
 .container > p {
+  text-align: center;
 margin-bottom: 2rem;
 font-size: 1.1rem;
 color: #888;

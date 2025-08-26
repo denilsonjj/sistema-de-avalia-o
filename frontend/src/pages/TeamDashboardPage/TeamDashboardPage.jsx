@@ -40,14 +40,12 @@ function TeamDashboardPage() {
       <Card title="Membros da Equipe">
         <table className={styles.teamTable}>
           <thead>
-            <tr>
-              <th style={{ width: '60px' }}></th> {/* Coluna para Avatar */}
+              <th style={{ width: '60px'}}></th> {/* Coluna para Avatar */}
               <th>Nome</th>
               <th>Email</th>
               <th>Perfil</th>
-              <th>Última Avaliação</th> {/* Nova Coluna */}
+              <th>Última Avaliação</th> 
               <th>Ações</th>
-            </tr>
           </thead>
           <tbody>
             {users.map(user => {

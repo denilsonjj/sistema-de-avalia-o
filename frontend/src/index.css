@@ -59,7 +59,7 @@ body[data-theme='dark'] {
 }
 
 body {
-  margin: 0;
+  margin: 0 auto;
   font-family: 'Encode Sans Expanded', sans-serif;
   /* Transição suave de cores */
   transition: background-color 0.3s, color 0.3s;

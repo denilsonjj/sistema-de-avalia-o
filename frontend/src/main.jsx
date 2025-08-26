@@ -22,7 +22,6 @@ import AssignGoalPage from './pages/AssignGoalPage/AssignGoalPage.jsx';
 import ManageUserLinesPage from './pages/ManageUserLinesPage/ManageUserLinesPage.jsx';
 import 'react-datepicker/dist/react-datepicker.css';
 import './index.css';
-
 const router = createBrowserRouter([
   {
     path: '/',

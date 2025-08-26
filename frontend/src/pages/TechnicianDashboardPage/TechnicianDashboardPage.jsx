@@ -1,10 +1,9 @@
-// frontend/src/pages/TechnicianDashboardPage/TechnicianDashboardPage.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/Card/Card';
-import CompetencyRadarChart from '../../components/charts/CompetencyRadarChart'; // Importar o gráfico
+import CompetencyRadarChart from '../../components/charts/CompetencyRadarChart'; 
 import styles from './TechnicianDashboardPage.module.css';
 import { FaBullseye } from 'react-icons/fa';
 
@@ -14,7 +13,7 @@ function TechnicianDashboardPage() {
   const [goals, setGoals] = useState([]);
   const [oeeData, setOeeData] = useState(null); 
   const [loading, setLoading] = useState(true);
-  const [lines, setLines] = useState([]); // Estado para as linhas associadas ao técnico
+  const [lines, setLines] = useState([]); 
   const firstName = user?.name ? user.name.split(' ')[0] : 'Usuário';
 
   useEffect(() => {
@@ -34,7 +33,7 @@ function TechnicianDashboardPage() {
         }
         setGoals(goalsRes.data);
 
-        // Calcula a média de OEE se o usuário tiver múltiplas linhas
+       
         if (oeeRes.data && oeeRes.data.length > 0) {
             const avgAvailability = oeeRes.data.reduce((sum, item) => sum + item.availability, 0) / oeeRes.data.length;
             const avgPerformance = oeeRes.data.reduce((sum, item) => sum + item.performance, 0) / oeeRes.data.length;
@@ -73,31 +72,13 @@ function TechnicianDashboardPage() {
       <h1>Bem-vindo, {firstName}!</h1>
       <p>Aqui está um resumo do seu desempenho e atividades recentes.</p>
       
-      {/* Seção de KPIs de OEE */}
+  
       {oeeData && (
         <div className={styles.kpiGrid}>
-           {/* <Card>
-                <div className={styles.kpiCard} style={{borderColor: 'var(--color-primary)'}}>
-                    <div className={styles.kpiValue}>{oeeData.oee.toFixed(1)}%</div>
-                    <div className={styles.kpiLabel}>Meu OEE</div>
-                </div>
-            </Card>
-            <Card>
-                 <div className={styles.kpiCard} style={{borderColor: 'var(--color-mint)'}}>
-                    <div className={styles.kpiValue}>{oeeData.availability.toFixed(1)}%</div>
-                    <div className={styles.kpiLabel}>Disponibilidade</div>
-                </div>
-            </Card>*/}
             <Card>
                  <div className={styles.kpiCard} style={{borderColor: 'var(--color-orange)'}}>
                     <div className={styles.kpiValue}>{oeeData.performance.toFixed(1)}%</div>
                     <div className={styles.kpiLabel}>Performance média das linhas</div>
-                </div>
-            </Card>
-            <Card>
-                 <div className={styles.kpiCard} style={{borderColor: 'var(--color-tangerine)'}}>
-                    <div className={styles.kpiValue}>{oeeData.quality.toFixed(1)}%</div>
-                    <div className={styles.kpiLabel}>Qualidade</div>
                 </div>
             </Card>
         </div>
@@ -124,7 +105,7 @@ function TechnicianDashboardPage() {
             {inProgressGoals.length > 0 ? (
               <div className={styles.goalsList}>
                 {inProgressGoals.map(goal => (
-                  <div key={goal.id} className={styles.goalItem}>
+                  <div key={goal.id} classsName={styles.goalItem}>
                     <FaBullseye /> <span>{goal.title}</span>
                   </div>
                 ))}
