@@ -1,11 +1,10 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import App from './App.jsx';
 import LoginPage from './pages/LoginPage.jsx';
-import DashboardRouter from './pages/DashboardRouter.jsx'; // Importe o Roteador
+import DashboardRouter from './pages/DashboardRouter.jsx'; 
 import TeamDashboardPage from './pages/TeamDashboardPage/TeamDashboardPage.jsx';
 import EvaluationDetailPage from './pages/EvaluationDetailPage/EvaluationDetailPage.jsx';
 import CreateEvaluationPage from './pages/CreateEvaluationPage/CreateEvaluationPage.jsx';
@@ -20,6 +19,7 @@ import ProfilePage from './pages/ProfilePage/ProfilePage.jsx';
 import ReportsPage from './pages/ReportsPage/ReportsPage';
 import AssignGoalPage from './pages/AssignGoalPage/AssignGoalPage.jsx';
 import ManageUserLinesPage from './pages/ManageUserLinesPage/ManageUserLinesPage.jsx';
+import TeamGoaslPage from './pages/TeamGoalsPage/TeamGoalsPage.jsx'
 import 'react-datepicker/dist/react-datepicker.css';
 import './index.css';
 const router = createBrowserRouter([
@@ -77,6 +77,10 @@ const router = createBrowserRouter([
       {
         path: '/metas',
         element: <ProtectedRoute><GoalsPage /></ProtectedRoute>,
+      },
+      {
+        path:'/metas-equipe',
+        element:  <ProtectedRoute><TeamGoaslPage/></ProtectedRoute> 
       },
       {
         path: '/perfil',

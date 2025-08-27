@@ -116,3 +116,19 @@ h1{
   .deleteButton:hover {
     background-color: #a11206;
   }
+
+.GoalContent{
+display: flex;
+
+  }
+.datePickerInput {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+    font-family: inherit;
+    background-color: var(--color-background);
+    color: var(--color-text);
+    box-sizing: border-box;
+  }

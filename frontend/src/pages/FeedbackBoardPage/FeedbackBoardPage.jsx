@@ -75,23 +75,20 @@ function FeedbackBoardPage() {
       confirmButtonText: 'Sim, apagar!',
       cancelButtonText: 'Cancelar'
     }).then(async (result) => {
-      // Se o usuário clicar em "Sim, apagar"
+      
       if (result.isConfirmed) {
-        try {
-          // Chama a API para deletar
+        try { 
           await api.delete(`/feedbacks/${feedbackId}`);
-          // Remove o feedback da tela
           setFeedbacks(currentFeedbacks =>
             currentFeedbacks.filter(feedback => feedback.id !== feedbackId)
           );
-          // Mostra um alerta de sucesso
           MySwal.fire(
             'Apagado!',
             'O feedback foi removido.',
             'success'
           );
         } catch (error) {
-          // Mostra um alerta de erro se a API falhar
+          
           console.error("Erro ao deletar feedback:", error);
           MySwal.fire(
             'Erro!',

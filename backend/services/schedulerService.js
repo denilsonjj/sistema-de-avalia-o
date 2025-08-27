@@ -76,19 +76,19 @@ const updateOeeData = async () => {
     console.log('--- Tarefa agendada finalizada ---');
 };
 
-/*
+
 const startScheduler = () => {
-   cron.schedule('*30 * * * * *', updateOeeData, {
+   cron.schedule('*/30 * * * * *', updateOeeData, {
        scheduled: true
   });
-};*/
+};
 
 
-const startScheduler = () => {
+/*const startScheduler = () => {
     cron.schedule('35 9 * * *', updateOeeData, {
         scheduled: true,
         timezone: "America/Sao_Paulo"
     });
     console.log('Agendador de tarefas iniciado. A tarefa rodará todos os dias às 09:35.');
-};
+};*/
 module.exports = { startScheduler };

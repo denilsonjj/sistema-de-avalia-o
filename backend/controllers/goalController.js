@@ -55,3 +55,22 @@ exports.deleteGoal = async (req, res) => {
         res.status(500).json({ message: 'Erro ao deletar meta.' });
     }
 }
+exports.getAllGoals = async (req, res) => {
+  // Verificação de segurança para garantir que apenas o PMM acesse
+  if (req.user.role !== 'PMM') {
+    return res.status(403).json({ message: 'Acesso negado.' });
+  }
+
+  try {
+    const goals = await prisma.goal.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        author: { select: { name: true } }, // quem criou
+        user: { select: { name: true } }    // para quem é a meta
+      },
+    });
+    res.status(200).json(goals);
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar todas as metas.' });
+  }
+};

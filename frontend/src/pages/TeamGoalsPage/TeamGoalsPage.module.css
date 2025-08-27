@@ -1,0 +1,182 @@
+/* TeamGoalsPage.module.css */
+
+.container {
+    padding: 1.5rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.container h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--color-text);
+    font-size: 1.75rem;
+}
+
+/* Card que envolve o formulário */
+.formCard {
+    background-color: var(--color-surface);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--color-border);
+}
+
+/* Grid para o formulário, usando a classe que você já tinha no JSX */
+.formGrid {
+    display: grid;
+    
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+    align-items: flex-end;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    
+}
+
+.formGroup label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+}
+.label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+
+}
+.formGroup input,
+.datePickerInput {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+    font-family: inherit;
+    background-color: var(--color-background);
+    color: var(--color-text);
+    box-sizing: border-box; 
+    height: 46px;
+}
+
+.formGroup input:focus,
+.datePickerInput:focus {
+    outline: auto;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(36, 55, 130, 0.2);
+}
+
+.submitButton {
+    background-color: var(--color-primary);
+    color: var(--color-text-on-primary);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    height: 46px;
+    width: 100%;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+.submitButton:hover {
+    background-color: #1a2868; 
+}
+
+/* Quadro Kanban */
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.column {
+    background-color: var(--color-background);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+}
+
+.column h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    padding-bottom: 0.8rem;
+    margin: 0;
+    border-bottom: 2px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    color: var(--color-text);
+}
+
+.cardList {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex-grow: 1;
+}
+
+.goalCard {
+    background: var(--color-surface);
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: grab;
+    border: 1px solid var(--color-border);
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.goalCard:active {
+    cursor: grabbing;
+}
+
+.goalCard p {
+    font-weight: 600;
+    margin: 0 0 0.8rem 0;
+    overflow-wrap: break-word;
+}
+
+.goalCard small {
+    color: #888;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.GoalContent {
+    display: flex;
+    flex-direction: column;
+}
+  
+.deleteButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    background-color: #c74338; /* Cor de exemplo */
+    color: white;
+    text-decoration: none;
+}
+
+.deleteButton:hover {
+    background-color: #a11206;
+}
+

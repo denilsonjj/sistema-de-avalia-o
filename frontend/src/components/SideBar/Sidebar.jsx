@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import styles from './Sidebar.module.css';
 import {
   FaTachometerAlt, FaUserCog, FaClipboardList, FaBullseye, FaPencilAlt,
-  FaUsers, FaComments, FaUsersCog, FaChartBar
+  FaUsers, FaComments, FaUsersCog, FaChartBar,FaTasks
 } from 'react-icons/fa';
 
 function Sidebar({ isMobileOpen, isDesktopCollapsed, onLinkClick, onCollapseClick }) {
@@ -36,7 +36,14 @@ function Sidebar({ isMobileOpen, isDesktopCollapsed, onLinkClick, onCollapseClic
             <span className={styles.icon}><FaBullseye /></span>
             <span className={`${styles.text} ${isDesktopCollapsed ? styles.textCollapsed : ''}`}>Minhas Metas</span>
           </NavLink>
-
+          {user && (user.role === 'PMM')  && 
+          (
+          <NavLink to="/metas-equipe" {...getLinkProps('Metas da Equipe')}>
+                <span className={styles.icon}><FaTasks /></span> {/* Exemplo de ícone */}
+                <span className={`${styles.text} ${isDesktopCollapsed ? styles.textCollapsed : ''}`}>Metas da Equipe</span>
+          </NavLink>
+          )}
+          
           {user && (user.role === 'TECNICO' || user.role === 'ESTAGIARIO' || user.role === 'PMS') && (
             <NavLink to="/autoavaliacao" {...getLinkProps('Autoavaliação')}>
               <span className={styles.icon}><FaPencilAlt /></span>

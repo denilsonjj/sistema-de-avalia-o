@@ -1,0 +1,31 @@
+.goalCard {
+    background: var(--color-surface);
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: grab;
+    border: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .goalContent {
+    overflow-wrap: break-word;
+    flex-grow: 1;
+  }
+  
+  .goalContent p {
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+  }
+  
+  .goalContent small {
+    color: #888;
+    font-size: 0.8rem;
+  }
+  
+  .avatarContainer {
+    flex-shrink: 0;
+  }
