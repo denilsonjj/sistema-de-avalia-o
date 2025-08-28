@@ -1,119 +1,207 @@
-.container h1 {
-    color: var(--color-primary);
-    text-align: center;
-  }
-  
-  .container > p {
-    margin-bottom: 2rem;
-    font-size: 1.1rem;
-    color: #888;
-    text-align: center;
-  }
-  
-  
+/* MELHORIA: Layout geral e espaçamento */
+.container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.header h1 {
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  font-size: 1.1rem;
+  color: #667085; /* Cor de texto secundária mais suave */
+}
+
+/* MELHORIA: Uso de CSS Grid para um layout de duas colunas robusto */
+.profileGrid {
+  display: grid;
+  grid-template-columns: 300px 1fr; /* Coluna esquerda fixa, direita flexível */
+  gap: 2rem;
+  align-items: start;
+}
+
+.leftColumn {
+  position: sticky; /* Efeito "flutuante" ao rolar a página */
+  top: 2rem;
+}
+
+/* NOVO: Estilos para o upload de avatar */
+.avatarCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+.avatarWrapper {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.avatarWrapper > div { /* Estilizando o componente Avatar */
+  width: 120px;
+  height: 120px;
+  font-size: 3.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.avatarEditButton {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background-color: var(--color-primary);
+  color: white;
+  border: 2px solid white;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.avatarEditButton:hover {
+  transform: scale(1.1);
+  background-color: var(--color-primary-dark); /* Uma variação mais escura no hover */
+}
+
+.userName {
+  font-size: 1.5rem;
+  color: var(--color-text);
+  margin: 0.5rem 0;
+  text-align: center;
+  font-weight: 600;
+}
+
+.userEmail {
+  font-size: 1rem;
+  color: #667085;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* MELHORIA: Estilos do formulário mais refinados */
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
+}
+
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  border-radius: 8px; /* Bordas mais arredondadas */
+  border: 1px solid #D0D5DD;
+  font-family: inherit;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2); /* Efeito de foco acessível */
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* MELHORIA: Estilo do botão de submit */
+.submitButton {
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-2px);
+}
+
+.submitButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submitButton:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+}
+
+/* NOVO: Estilos para as mensagens de notificação */
+.message {
+  text-align: center;
+  font-weight: 600;
+  padding: 0.8rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.message.success {
+  background-color: #D1FAE5;
+  color: #065F46;
+}
+
+.message.error {
+  background-color: #FEE2E2;
+  color: #991B1B;
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.2rem;
+  padding: 3rem;
+}
+
+/* MELHORIA: Responsividade para telas menores */
+@media (max-width: 900px) {
   .profileGrid {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 2rem;
-    align-items: flex-start;
+    grid-template-columns: 1fr; /* Coluna única */
   }
-  
   .leftColumn {
-    position: sticky;
-    top: 2rem;
+    position: static; /* Remove o efeito sticky */
   }
-  
-  .avatarCard {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem 1rem;
-  }
-  
-  .avatarCard > div {
-    width: 120px;
-    height: 120px;
-    font-size: 3rem;
-    margin-bottom: 1rem;
-  }
-  
-  .userName {
-    font-size: 1.5rem;
-    color: var(--color-text);
-    margin: 0.5rem 0;
-    text-align: center;
-  }
-  
-  .userEmail {
-    font-size: 1rem;
-    color: #888;
-    margin: 0;
-  }
-  
-  .form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .formGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .formGroup label {
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .formGroup input,
-  .formGroup textarea {
-    padding: 0.8rem;
-    font-size: 1rem;
-    border-radius: 4px;
-    border: 1px solid var(--color-border);
-    font-family: inherit;
-    background-color: var(--color-surface);
-    color: var(--color-text);
-  }
-  
-  .formGroup textarea {
-    resize: vertical;
-  }
-  
   .submitButton {
-    padding: 0.8rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 700;
-    background-color: var(--color-primary);
-    color: var(--color-text-on-primary);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    align-self: flex-start; 
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    align-self: stretch; /* Botão ocupa a largura toda */
+    justify-content: center;
   }
-  
-  .submitButton:disabled {
-    background-color: #a0a0a0;
-  }
-  
-  .message {
-    text-align: center;
-    font-weight: 600;
-    margin-top: 1rem;
-  }
-  
-  @media (max-width: 900px) {
-    .profileGrid {
-      grid-template-columns: 1fr;
-    }
-    .leftColumn {
-      position: static;
-    }
-  }
+}

@@ -1,22 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/Card/Card';
-import Avatar from '../../components/Avatar/Avatar'; 
+import Avatar from '../../components/Avatar/Avatar';
 import styles from './ProfilePage.module.css';
-import { FaUser, FaEnvelope, FaTools, FaCertificate, FaSave } from 'react-icons/fa'; 
+import { FaUser, FaEnvelope, FaTools, FaCertificate, FaSave, FaCamera } from 'react-icons/fa';
 
 function ProfilePage() {
-  const { user } = useAuth();
+  const { user, updateUserAvatar } = useAuth(); // Pega a função para atualizar o avatar no contexto
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     technicalSkills: '',
     certifications: '',
+    avatarUrl: '', // NOVO: Campo para a URL do avatar
   });
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState('');
+  const [notification, setNotification] = useState({ type: '', message: '' }); // MELHORIA: Estado para notificações
+  const fileInputRef = useRef(null); // NOVO: Referência para o input de arquivo
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -28,9 +30,11 @@ function ProfilePage() {
           email: res.data.email || '',
           technicalSkills: res.data.technicalSkills || '',
           certifications: res.data.certifications || '',
+          avatarUrl: res.data.avatarUrl || '', // NOVO: Carrega a URL do avatar
         });
       } catch (error) {
         console.error("Erro ao buscar dados do perfil", error);
+        setNotification({ type: 'error', message: 'Não foi possível carregar os dados do perfil.' });
       } finally {
         setLoading(false);
       }
@@ -46,36 +50,78 @@ function ProfilePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    setMessage('');
+    setNotification({ type: '', message: '' });
     try {
       await api.put('/auth/profile', {
         name: formData.name,
         technicalSkills: formData.technicalSkills,
         certifications: formData.certifications,
       });
-      setMessage('Perfil atualizado com sucesso!');
+      setNotification({ type: 'success', message: 'Perfil atualizado com sucesso!' });
     } catch (err) {
-      setMessage('Erro ao atualizar o perfil.');
+      setNotification({ type: 'error', message: 'Erro ao atualizar o perfil. Tente novamente.' });
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) return <p>Carregando perfil...</p>;
+  // NOVO: Função para lidar com o upload da imagem
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const uploadFormData = new FormData();
+    uploadFormData.append('avatar', file);
+
+    try {
+      const res = await api.post('/auth/upload-avatar', uploadFormData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      const newAvatarUrl = res.data.avatarUrl;
+      setFormData(prev => ({ ...prev, avatarUrl: newAvatarUrl }));
+      updateUserAvatar(newAvatarUrl); // Atualiza o avatar no contexto global
+      setNotification({ type: 'success', message: 'Avatar atualizado!' });
+    } catch (error) {
+      console.error("Erro ao fazer upload do avatar", error);
+      setNotification({ type: 'error', message: 'Falha no upload da imagem.' });
+    }
+  };
+
+  if (loading) return <p className={styles.loading}>Carregando perfil...</p>;
 
   return (
     <div className={styles.container}>
-      <h1>Meu Perfil</h1>
-      <p>Mantenha suas informações e competências atualizadas.</p>
-      
+      <div className={styles.header}>
+        <h1>Meu Perfil Profissional</h1>
+        <p>Mantenha suas informações e competências sempre atualizadas.</p>
+      </div>
+
       <div className={styles.profileGrid}>
         {/* Coluna da Esquerda: Avatar e Infos */}
         <div className={styles.leftColumn}>
           <Card>
             <div className={styles.avatarCard}>
-              <Avatar name={formData.name} />
+              <div className={styles.avatarWrapper}>
+                <Avatar name={formData.name} src={formData.avatarUrl} />
+                <button
+                  className={styles.avatarEditButton}
+                  onClick={() => fileInputRef.current.click()}
+                  title="Alterar foto de perfil"
+                >
+                  <FaCamera />
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleAvatarUpload}
+                  style={{ display: 'none' }}
+                  accept="image/png, image/jpeg"
+                />
+              </div>
               <h2 className={styles.userName}>{formData.name}</h2>
-              <p className={styles.userEmail}>{formData.email}</p>
+              <p className={styles.userEmail}><FaEnvelope /> {formData.email}</p>
             </div>
           </Card>
         </div>
@@ -90,15 +136,19 @@ function ProfilePage() {
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="technicalSkills"><FaTools /> Conhecimentos Técnicos</label>
-                <textarea id="technicalSkills" name="technicalSkills" value={formData.technicalSkills} onChange={handleChange} rows="6" placeholder="Ex: CLP Siemens, Redes Profinet..."/>
+                <textarea id="technicalSkills" name="technicalSkills" value={formData.technicalSkills} onChange={handleChange} rows="6" placeholder="Ex: CLP Siemens, Redes Profinet, Inversores WEG..." />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="certifications"><FaCertificate /> Cursos e Certificações</label>
-                <textarea id="certifications" name="certifications" value={formData.certifications} onChange={handleChange} rows="6" placeholder="Ex: NR-10 (Val: 12/2025)..."/>
+                <textarea id="certifications" name="certifications" value={formData.certifications} onChange={handleChange} rows="6" placeholder="Ex: NR-10 (Val: 12/2025), Comandos Elétricos..." />
               </div>
-              
-              {message && <p className={styles.message}>{message}</p>}
-              
+
+              {notification.message && (
+                <p className={`${styles.message} ${styles[notification.type]}`}>
+                  {notification.message}
+                </p>
+              )}
+
               <button type="submit" className={styles.submitButton} disabled={submitting}>
                 <FaSave /> {submitting ? 'Salvando...' : 'Salvar Alterações'}
               </button>

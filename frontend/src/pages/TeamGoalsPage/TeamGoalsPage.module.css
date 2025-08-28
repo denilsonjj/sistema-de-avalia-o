@@ -1,5 +1,3 @@
-/* TeamGoalsPage.module.css */
-
 .container {
     padding: 1.5rem;
     max-width: 1600px;
@@ -89,7 +87,6 @@
     background-color: #1a2868; 
 }
 
-/* Quadro Kanban */
 .board {
     display: grid;
     grid-template-columns: repeat(3, 1fr); 
