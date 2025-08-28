@@ -46,6 +46,7 @@ model User {
   // Campos de Perfil
   technicalSkills     String?
   certifications      String?
+  avatarUrl           String? //foto do usuario
   
   // Relações
   productionLines     ProductionLine[]

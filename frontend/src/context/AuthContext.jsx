@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+
 // Função para decodificar o payload do JWT
 function parseJwt(token) {
   if (!token) { return null; }
@@ -47,12 +48,21 @@ export function AuthProvider({ children }) {
     navigate('/');
   };
 
+  const updateUserAvatar = (newAvatarUrl) => {
+    setUser(prevUser => ({
+      ...prevUser,
+      avatarUrl: newAvatarUrl
+    }));
+  };
+
+
   const value = {
     token,
     user, // Disponibiliza o usuário no contexto
     isAuthenticated: !!token,
     login,
     logout,
+    updateUserAvatar
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

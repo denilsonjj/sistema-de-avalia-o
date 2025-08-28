@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const ExcelJS = require('exceljs');
 const prisma = new PrismaClient();
+const cloudinary = require('../config/cloudinary');
+const { Readable } = require('stream');
 
 exports.register = async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -190,5 +192,51 @@ exports.exportUsers = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ message: 'Erro ao exportar relatório de usuários.', error: error.message });
+  }
+};
+
+exports.uploadAvatar = async (req, res) => {
+  const { userId } = req.user; 
+
+  if (!req.file) {
+    return res.status(400).json({ message: 'Nenhum arquivo enviado.' });
+  }
+
+  try {
+   
+    const stream = Readable.from(req.file.buffer);
+
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "avatars", // Opcional: salva em uma pasta no Cloudinary
+        public_id: userId,  // Usa o ID do usuário como nome do arquivo, sobrescrevendo o anterior
+        overwrite: true,
+        format: 'webp',     // Converte para um formato otimizado para a web
+        transformation: [   // Redimensiona para um tamanho máximo
+            {width: 250, height: 250, crop: "fill", gravity: "face"}
+        ]
+      },
+      async (error, result) => {
+        if (error) {
+          console.error('Cloudinary Error:', error);
+          return res.status(500).json({ message: 'Erro ao fazer upload da imagem.' });
+        }
+
+        // Salva a URL segura no banco de dados
+        await prisma.user.update({
+          where: { id: userId },
+          data: { avatarUrl: result.secure_url },
+        });
+
+        res.status(200).json({ avatarUrl: result.secure_url });
+      }
+    );
+
+    // Inicia o upload
+    stream.pipe(uploadStream);
+
+  } catch (error) {
+    console.error('Server Error:', error);
+    res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };
