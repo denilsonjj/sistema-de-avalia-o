@@ -3,8 +3,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const ExcelJS = require('exceljs');
 const prisma = new PrismaClient();
-const cloudinary = require('../config/cloudinary');
-const { Readable } = require('stream');
+const cloudinary = require('../config/cloudinary'); // Garanta que este import exista
+const { Readable } = require('stream'); // Garanta que este import exista
 
 exports.register = async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -77,7 +77,17 @@ exports.getUserById = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: id },
-      select: { id: true, name: true, email: true, role: true },
+      // --- CORREÇÃO AQUI ---
+      // Agora selecionamos todos os campos necessários para o perfil.
+      select: { 
+        id: true, 
+        name: true, 
+        email: true, 
+        role: true, 
+        technicalSkills: true, 
+        certifications: true, 
+        avatarUrl: true 
+      },
     });
     if (!user) {
       return res.status(404).json({ message: 'Usuário não encontrado.' });
@@ -87,19 +97,17 @@ exports.getUserById = async (req, res) => {
     res.status(500).json({ message: 'Erro ao buscar usuário.' });
   }
 };
+
 exports.deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
-    // Transação para deletar o usuário e todos os seus registros relacionados
     const deleteTransactions = [
       prisma.feedback.deleteMany({ where: { OR: [{ recipientId: id }, { authorId: id }] } }),
       prisma.selfAssessment.deleteMany({ where: { userId: id } }),
       prisma.evaluation.deleteMany({ where: { userId: id } }),
       prisma.user.delete({ where: { id: id } }),
     ];
-
     await prisma.$transaction(deleteTransactions);
-
     res.status(204).send();
   } catch (error) {
     if (error.code === 'P2025') {
@@ -108,21 +116,15 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Erro ao excluir usuário.', error: error.message });
   }
 };
-// ATUALIZAR O PERFIL DO PRÓPRIO USUÁRIO
-exports.updateUserProfile = async (req, res) => {
-  const { userId } = req.user; // Pega o ID do usuário logado a partir do token
-  const { name, technicalSkills, certifications } = req.body;
 
+exports.updateUserProfile = async (req, res) => {
+  const { userId } = req.user;
+  const { name, technicalSkills, certifications } = req.body;
   try {
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: {
-        name,
-        technicalSkills,
-        certifications,
-      },
+      data: { name, technicalSkills, certifications },
     });
-    // Remove a senha do objeto de resposta
     const { password, ...userWithoutPassword } = updatedUser;
     res.status(200).json(userWithoutPassword);
   } catch (error) {
@@ -130,45 +132,70 @@ exports.updateUserProfile = async (req, res) => {
   }
 };
 
-// Adicionar ao final de backend/controllers/authController.js
+exports.uploadAvatar = async (req, res) => {
+    const { userId } = req.user;
+    if (!req.file) {
+      return res.status(400).json({ message: 'Nenhum arquivo enviado.' });
+    }
+    try {
+      const stream = Readable.from(req.file.buffer);
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: "avatars_sistema_avaliacao",
+          public_id: userId,
+          overwrite: true,
+          format: 'webp',
+          transformation: [{width: 250, height: 250, crop: "fill", gravity: "face"}]
+        },
+        async (error, result) => {
+          if (error) {
+            console.error('Erro no upload para o Cloudinary:', error);
+            return res.status(500).json({ message: 'Erro ao fazer upload da imagem.' });
+          }
+          await prisma.user.update({
+            where: { id: userId },
+            data: { avatarUrl: result.secure_url },
+          });
+          res.status(200).json({ avatarUrl: result.secure_url });
+        }
+      );
+      stream.pipe(uploadStream);
+    } catch (error) {
+      console.error('Erro no servidor durante o upload:', error);
+      res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+};
 
 exports.getUserStatsByRole = async (req, res) => {
   try {
     const usersByRole = await prisma.user.groupBy({
       by: ['role'],
-      _count: {
-        id: true,
-      },
+      _count: { id: true },
     });
-
-    // Formata os dados para o gráfico
     const formattedData = usersByRole.map(item => ({
       name: item.role,
       value: item._count.id,
     }));
-
     res.status(200).json(formattedData);
   } catch (error) {
     res.status(500).json({ message: 'Erro ao buscar estatísticas de usuários por perfil.', error: error.message });
   }
 };
+
 exports.exportUsers = async (req, res) => {
   try {
     const users = await prisma.user.findMany({
       orderBy: { name: 'asc' },
       select: { name: true, email: true, role: true, createdAt: true },
     });
-
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Usuários');
-
     worksheet.columns = [
       { header: 'Nome do Usuário', key: 'name', width: 40 },
       { header: 'Email', key: 'email', width: 40 },
       { header: 'Perfil', key: 'role', width: 20 },
       { header: 'Data de Cadastro', key: 'createdAt', width: 20 },
     ];
-
     users.forEach(user => {
       worksheet.addRow({
         name: user.name,
@@ -177,7 +204,6 @@ exports.exportUsers = async (req, res) => {
         createdAt: new Date(user.createdAt).toLocaleDateString('pt-BR'),
       });
     });
-
     res.setHeader(
       'Content-Type',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -186,57 +212,9 @@ exports.exportUsers = async (req, res) => {
       'Content-Disposition',
       'attachment; filename=' + 'Relatorio_Usuarios.xlsx'
     );
-
     await workbook.xlsx.write(res);
     res.end();
-
   } catch (error) {
     res.status(500).json({ message: 'Erro ao exportar relatório de usuários.', error: error.message });
-  }
-};
-
-exports.uploadAvatar = async (req, res) => {
-  const { userId } = req.user; 
-
-  if (!req.file) {
-    return res.status(400).json({ message: 'Nenhum arquivo enviado.' });
-  }
-
-  try {
-   
-    const stream = Readable.from(req.file.buffer);
-
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: "avatars", // Opcional: salva em uma pasta no Cloudinary
-        public_id: userId,  // Usa o ID do usuário como nome do arquivo, sobrescrevendo o anterior
-        overwrite: true,
-        format: 'webp',     // Converte para um formato otimizado para a web
-        transformation: [   // Redimensiona para um tamanho máximo
-            {width: 250, height: 250, crop: "fill", gravity: "face"}
-        ]
-      },
-      async (error, result) => {
-        if (error) {
-          console.error('Cloudinary Error:', error);
-          return res.status(500).json({ message: 'Erro ao fazer upload da imagem.' });
-        }
-
-        // Salva a URL segura no banco de dados
-        await prisma.user.update({
-          where: { id: userId },
-          data: { avatarUrl: result.secure_url },
-        });
-
-        res.status(200).json({ avatarUrl: result.secure_url });
-      }
-    );
-
-    // Inicia o upload
-    stream.pipe(uploadStream);
-
-  } catch (error) {
-    console.error('Server Error:', error);
-    res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };

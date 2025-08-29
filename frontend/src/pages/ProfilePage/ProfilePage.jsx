@@ -7,44 +7,34 @@ import styles from './ProfilePage.module.css';
 import { FaUser, FaEnvelope, FaTools, FaCertificate, FaSave, FaCamera } from 'react-icons/fa';
 
 function ProfilePage() {
-  const { user, updateUserAvatar } = useAuth(); // Pega a função para atualizar o avatar no contexto
+  const { user, updateUserAvatar, updateUserData } = useAuth();
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     technicalSkills: '',
     certifications: '',
-    avatarUrl: '', // NOVO: Campo para a URL do avatar
+    avatarUrl: '',
   });
-  const [loading, setLoading] = useState(true);
+
   const [submitting, setSubmitting] = useState(false);
-  const [notification, setNotification] = useState({ type: '', message: '' }); // MELHORIA: Estado para notificações
-  const fileInputRef = useRef(null); // NOVO: Referência para o input de arquivo
+  const [notification, setNotification] = useState({ type: '', message: '' });
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (!user) return;
-      try {
-        const res = await api.get(`/auth/users/${user.userId}`);
-        setFormData({
-          name: res.data.name || '',
-          email: res.data.email || '',
-          technicalSkills: res.data.technicalSkills || '',
-          certifications: res.data.certifications || '',
-          avatarUrl: res.data.avatarUrl || '', // NOVO: Carrega a URL do avatar
-        });
-      } catch (error) {
-        console.error("Erro ao buscar dados do perfil", error);
-        setNotification({ type: 'error', message: 'Não foi possível carregar os dados do perfil.' });
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUserData();
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        technicalSkills: user.technicalSkills || '',
+        certifications: user.certifications || '',
+        avatarUrl: user.avatarUrl || '',
+      });
+    }
   }, [user]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
@@ -52,20 +42,23 @@ function ProfilePage() {
     setSubmitting(true);
     setNotification({ type: '', message: '' });
     try {
-      await api.put('/auth/profile', {
+      const dataToUpdate = {
         name: formData.name,
         technicalSkills: formData.technicalSkills,
         certifications: formData.certifications,
-      });
+      };
+      await api.put('/auth/profile', dataToUpdate);
+      
+      updateUserData(dataToUpdate);
+      
       setNotification({ type: 'success', message: 'Perfil atualizado com sucesso!' });
     } catch (err) {
-      setNotification({ type: 'error', message: 'Erro ao atualizar o perfil. Tente novamente.' });
+      setNotification({ type: 'error', message: 'Erro ao atualizar o perfil.' });
     } finally {
       setSubmitting(false);
     }
   };
 
-  // NOVO: Função para lidar com o upload da imagem
   const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -75,21 +68,22 @@ function ProfilePage() {
 
     try {
       const res = await api.post('/auth/upload-avatar', uploadFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-      const newAvatarUrl = res.data.avatarUrl;
-      setFormData(prev => ({ ...prev, avatarUrl: newAvatarUrl }));
-      updateUserAvatar(newAvatarUrl); // Atualiza o avatar no contexto global
+      
+      const newAvatarUrl = `${res.data.avatarUrl}?t=${new Date().getTime()}`;
+      
+      updateUserAvatar(newAvatarUrl);
+      
       setNotification({ type: 'success', message: 'Avatar atualizado!' });
     } catch (error) {
-      console.error("Erro ao fazer upload do avatar", error);
       setNotification({ type: 'error', message: 'Falha no upload da imagem.' });
     }
   };
-
-  if (loading) return <p className={styles.loading}>Carregando perfil...</p>;
+  
+  if (!user) {
+    return <p className={styles.loading}>Carregando perfil...</p>;
+  }
 
   return (
     <div className={styles.container}>
@@ -99,12 +93,11 @@ function ProfilePage() {
       </div>
 
       <div className={styles.profileGrid}>
-        {/* Coluna da Esquerda: Avatar e Infos */}
         <div className={styles.leftColumn}>
           <Card>
             <div className={styles.avatarCard}>
               <div className={styles.avatarWrapper}>
-                <Avatar name={formData.name} src={formData.avatarUrl} />
+                <Avatar name={formData.name} src={formData.avatarUrl} key={formData.avatarUrl} />
                 <button
                   className={styles.avatarEditButton}
                   onClick={() => fileInputRef.current.click()}
@@ -126,7 +119,6 @@ function ProfilePage() {
           </Card>
         </div>
 
-        {/* Coluna da Direita: Formulário de Edição */}
         <div className={styles.rightColumn}>
           <Card title="Editar Informações">
             <form onSubmit={handleSubmit} className={styles.form}>

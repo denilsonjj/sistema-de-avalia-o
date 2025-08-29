@@ -1,8 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
-
-// Função para decodificar o payload do JWT
 function parseJwt(token) {
   if (!token) { return null; }
   try {
@@ -11,7 +10,6 @@ function parseJwt(token) {
     const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
-
     return JSON.parse(jsonPayload);
   } catch (e) {
     console.error("Erro ao decodificar token:", e);
@@ -23,28 +21,39 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem('authToken'));
-  const [user, setUser] = useState(null); 
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('authToken');
-    if (storedToken) {
-      setToken(storedToken);
-      setUser(parseJwt(storedToken)); 
-    }
-  }, []);
+    const loadUser = async () => {
+      const storedToken = localStorage.getItem('authToken');
+      if (storedToken) {
+        setToken(storedToken);
+        const decoded = parseJwt(storedToken);
+        if (decoded && decoded.userId) {
+          try {
+            const res = await api.get(`/auth/users/${decoded.userId}`);
+            setUser(res.data);
+          } catch (error) {
+            console.error("Sessão inválida, fazendo logout.", error);
+            logout();
+          }
+        }
+      }
+    };
+    loadUser();
+  }, [token]);
 
   const login = (newToken) => {
     localStorage.setItem('authToken', newToken);
     setToken(newToken);
-    setUser(parseJwt(newToken)); 
     navigate('/dashboard');
   };
 
   const logout = () => {
     localStorage.removeItem('authToken');
     setToken(null);
-    setUser(null); // Limpa os dados do usuário
+    setUser(null);
     navigate('/');
   };
 
@@ -55,14 +64,21 @@ export function AuthProvider({ children }) {
     }));
   };
 
+  const updateUserData = (updatedData) => {
+    setUser(prevUser => ({
+      ...prevUser,
+      ...updatedData
+    }));
+  };
 
   const value = {
     token,
-    user, // Disponibiliza o usuário no contexto
+    user,
     isAuthenticated: !!token,
     login,
     logout,
-    updateUserAvatar
+    updateUserAvatar,
+    updateUserData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

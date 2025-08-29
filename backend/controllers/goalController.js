@@ -1,18 +1,28 @@
+// backend/controllers/goalController.js
+
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 // Criar nova meta
 exports.createGoal = async (req, res) => {
   const { userId, title, description, dueDate } = req.body;
-  const authorId = req.user.userId; 
+  const authorId = req.user.userId; // ID de quem está criando a meta (vem do token)
 
   try {
     const goal = await prisma.goal.create({
-      data: { userId, authorId, title, description, dueDate },
+      data: {
+        userId: userId, // Para quem a meta é destinada
+        authorId: authorId, // Quem criou a meta
+        title: title,
+        description: description,
+        dueDate: dueDate,
+      },
     });
     res.status(201).json(goal);
   } catch (error) {
-    res.status(500).json({ message: 'Erro ao criar meta.' });
+    // Log de erro melhorado para o terminal do backend
+    console.error("Erro detalhado ao criar meta:", error);
+    res.status(500).json({ message: 'Erro ao criar meta.', error: error.message });
   }
 };
 
@@ -31,13 +41,14 @@ exports.getGoalsForUser = async (req, res) => {
   }
 };
 
+// Atualizar status da meta
 exports.updateGoalStatus = async (req, res) => {
     const { id } = req.params;
-    const { status } = req.body; 
+    const { status } = req.body;
     try {
         const updatedGoal = await prisma.goal.update({
-            where: { id },
-            data: { status },
+            where: { id: id },
+            data: { status: status },
         });
         res.status(200).json(updatedGoal);
     } catch (error) {
@@ -45,28 +56,28 @@ exports.updateGoalStatus = async (req, res) => {
     }
 };
 
-// deletar meta
+// Deletar meta
 exports.deleteGoal = async (req, res) => {
     const { id } = req.params;
     try {
-        await prisma.goal.delete({ where: { id } });
+        await prisma.goal.delete({ where: { id: id } });
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ message: 'Erro ao deletar meta.' });
     }
 }
+
+// Obter todas as metas (apenas para PMM)
 exports.getAllGoals = async (req, res) => {
-  // Verificação de segurança para garantir que apenas o PMM acesse
   if (req.user.role !== 'PMM') {
     return res.status(403).json({ message: 'Acesso negado.' });
   }
-
   try {
     const goals = await prisma.goal.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
-        author: { select: { name: true } }, // quem criou
-        user: { select: { name: true } }    // para quem é a meta
+        author: { select: { name: true } },
+        user: { select: { name: true } }
       },
     });
     res.status(200).json(goals);

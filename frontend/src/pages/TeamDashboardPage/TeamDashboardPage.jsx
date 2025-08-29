@@ -57,7 +57,7 @@ function TeamDashboardPage() {
 
               return (
                 <tr key={user.id}>
-                  <td className={styles.avatarCell}><Avatar name={user.name} /></td>
+                  <td className={styles.avatarCell}><Avatar src={user.avatarUrl} name={user.name} /></td>
                   <td data-label="Nome">{user.name}</td>
                   <td data-label="Email">{user.email}</td>
                   <td data-label="Perfil">{user.role}</td>

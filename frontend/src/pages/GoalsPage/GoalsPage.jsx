@@ -1,12 +1,9 @@
+// frontend/src/pages/GoalsPage/GoalsPage.jsx
+
 import React, { useState, useEffect } from "react";
 import {
-  DndContext,
-  DragOverlay,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  closestCorners,
-  useDroppable,
+  DndContext, DragOverlay, PointerSensor, useSensor, useSensors,
+  closestCorners, useDroppable
 } from "@dnd-kit/core";
 import { SortableContext, useSortable, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -17,18 +14,10 @@ import { FaTrashAlt } from "react-icons/fa";
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
-
 const MySwal = withReactContent(Swal);
-function TaskCard({ goal, onDelete }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: goal.id });
 
+function TaskCard({ goal, onDelete }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: goal.id });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -36,21 +25,14 @@ function TaskCard({ goal, onDelete }) {
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className={styles.goalCard}
-    >
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={styles.goalCard}>
       <div>
         <p>{goal.title}</p>
         <small>Criado por: {goal.author.name}</small>
       </div>
-      <div>
-       <button
+      <button
         onClick={(e) => {
-          e.stopPropagation(); 
+          e.stopPropagation();
           onDelete(goal.id);
         }}
         className={styles.deleteButton}
@@ -58,13 +40,10 @@ function TaskCard({ goal, onDelete }) {
       >
         <FaTrashAlt />
       </button>
-    </div> 
-      </div>
-      
+    </div>
   );
 }
 
-// Componente Column atualizado para passar a função 'onDelete'
 function Column({ id, title, goals, onDelete }) {
   const { setNodeRef } = useDroppable({ id });
 
@@ -82,8 +61,6 @@ function Column({ id, title, goals, onDelete }) {
   );
 }
 
-// --- PÁGINA PRINCIPAL ---
-
 function GoalsPage() {
   const { user } = useAuth();
   const [columns, setColumns] = useState({
@@ -95,11 +72,7 @@ function GoalsPage() {
   const [loading, setLoading] = useState(true);
   const [activeGoal, setActiveGoal] = useState(null);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
-    })
-  );
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   const fetchGoals = async () => {
     if (!user) return;
@@ -109,7 +82,6 @@ function GoalsPage() {
         PENDENTE: res.data.filter((g) => g.status === "PENDENTE"),
         EM_ANDAMENTO: res.data.filter((g) => g.status === "EM_ANDAMENTO"),
         CONCLUIDA: res.data.filter((g) => g.status === "CONCLUIDA"),
-        DELETE: res.data.filter((g) => g.status === "DELETE"),
       });
     } catch (error) {
       console.error("Erro ao buscar metas:", error);
@@ -119,15 +91,22 @@ function GoalsPage() {
   };
 
   useEffect(() => {
-    fetchGoals();
+    if(user) {
+        fetchGoals();
+    }
   }, [user]);
 
   const handleCreateGoal = async (e) => {
     e.preventDefault();
-    if (!title.trim()) return;
-    await api.post("/goals", { userId: user.userId, title });
-    setTitle("");
-    fetchGoals();
+    if (!title.trim() || !user) return;
+    try {
+        await api.post("/goals", { userId: user.userId, title });
+        setTitle("");
+        fetchGoals();
+    } catch (error) {
+        console.error("Falha ao criar meta", error);
+        MySwal.fire('Erro!', 'Não foi possível criar a meta.', 'error');
+    }
   };
 
   const handleDeleteGoal = (goalId) => {
@@ -144,28 +123,11 @@ function GoalsPage() {
       if (result.isConfirmed) {
         try {
           await api.delete(`/goals/${goalId}`);
-          
-          // Atualiza o estado localmente para uma UI mais rápida
-          const containerKey = findContainer(goalId);
-          if (containerKey) {
-            setColumns(prevColumns => ({
-              ...prevColumns,
-              [containerKey]: prevColumns[containerKey].filter(goal => goal.id !== goalId)
-            }));
-          }
-
-          MySwal.fire(
-            'Apagada!',
-            'A meta foi removida.',
-            'success'
-          );
+          fetchGoals(); // Simplesmente busca os dados novamente para garantir a consistência
+          MySwal.fire('Apagada!', 'A meta foi removida.', 'success');
         } catch (error) {
           console.error("Erro ao deletar a meta:", error);
-          MySwal.fire(
-            'Erro!',
-            'Não foi possível apagar a meta.',
-            'error'
-          );
+          MySwal.fire('Erro!', 'Não foi possível apagar a meta.', 'error');
         }
       }
     });
@@ -173,78 +135,40 @@ function GoalsPage() {
 
   const findContainer = (id) => {
     if (id in columns) return id;
-    return Object.keys(columns).find((key) =>
-      columns[key].some((item) => item.id === id)
-    );
+    return Object.keys(columns).find((key) => columns[key].some((item) => item.id === id));
   };
 
   const onDragStart = (event) => {
     const allGoals = Object.values(columns).flat();
-    setActiveGoal(allGoals.find((g) => g.id === event.active.id));
+    setActiveGoal(allGoals.find((g) => g.id === event.active.id) || null);
   };
 
   const onDragEnd = (event) => {
     const { active, over } = event;
     setActiveGoal(null);
-
     if (!over) return;
 
-    const activeId = active.id;
-    const overId = over.id;
+    const activeContainer = findContainer(active.id);
+    const overContainer = findContainer(over.id) || over.id;
 
-    const activeContainer = findContainer(activeId);
-    const overContainer = findContainer(overId);
-
-    if (!activeContainer || !overContainer) return;
-
-    if (activeContainer === overContainer) {
-      const activeIndex = columns[activeContainer].findIndex(
-        (item) => item.id === activeId
-      );
-      const overIndex = columns[overContainer].findIndex(
-        (item) => item.id === overId
-      );
-
-      if (activeIndex !== overIndex) {
-        setColumns((prev) => ({
-          ...prev,
-          [overContainer]: arrayMove(
-            prev[overContainer],
-            activeIndex,
-            overIndex
-          ),
-        }));
-      }
-    } else {
-      const newStatus = overContainer;
-
-      api.put(`/goals/${activeId}/status`, { status: newStatus });
-
-      setColumns((prev) => {
-        const activeItems = [...prev[activeContainer]];
-        const overItems = [...prev[overContainer]];
-        const activeIndex = activeItems.findIndex(
-          (item) => item.id === activeId
-        );
-
-        const [movedItem] = activeItems.splice(activeIndex, 1);
-        movedItem.status = newStatus;
-
-        const overIndex = overItems.findIndex((item) => item.id === overId);
-
-        if (overIndex === -1) {
-          overItems.push(movedItem);
-        } else {
-          overItems.splice(overIndex, 0, movedItem);
-        }
-
-        return {
-          ...prev,
-          [activeContainer]: activeItems,
-          [overContainer]: overItems,
-        };
-      });
+    if (!activeContainer || !overContainer || activeContainer === overContainer) {
+      return; // Não faz nada se o movimento for inválido ou na mesma coluna
     }
+
+    const newStatus = overContainer;
+    api.put(`/goals/${active.id}/status`, { status: newStatus });
+
+    setColumns((prev) => {
+      const activeItems = prev[activeContainer];
+      const overItems = prev[overContainer];
+      const activeIndex = activeItems.findIndex((item) => item.id === active.id);
+      const [movedItem] = activeItems.splice(activeIndex, 1);
+      
+      movedItem.status = newStatus;
+      overItems.push(movedItem);
+
+      return { ...prev, [activeContainer]: [...activeItems], [overContainer]: [...overItems] };
+    });
   };
 
   const columnTitles = {
@@ -258,7 +182,6 @@ function GoalsPage() {
   return (
     <div>
       <h1 className="titlePage">Plano de Desenvolvimento</h1>
-
       <div className={styles.formCard}>
         <form onSubmit={handleCreateGoal}>
           <input
@@ -270,7 +193,6 @@ function GoalsPage() {
           <button type="submit">+ Adicionar Meta</button>
         </form>
       </div>
-
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -284,15 +206,12 @@ function GoalsPage() {
               id={status}
               title={title}
               goals={columns[status]}
-              onDelete={handleDeleteGoal} // Passando a função para a coluna
+              onDelete={handleDeleteGoal}
             />
           ))}
         </div>
-
         <DragOverlay>
-          {activeGoal ? (
-            <TaskCard goal={activeGoal} onDelete={() => {}} />
-          ) : null}
+          {activeGoal ? <TaskCard goal={activeGoal} onDelete={() => {}} /> : null}
         </DragOverlay>
       </DndContext>
     </div>

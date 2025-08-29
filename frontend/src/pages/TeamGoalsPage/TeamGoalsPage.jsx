@@ -122,7 +122,7 @@ function TeamGoalsPage() {
     if (!title.trim() || !selectedUser) {
       alert("Por favor, preencha o título e selecione um responsável.");
       return;
-    }
+}
     try {
       await api.post("/goals", { userId: selectedUser.value, title, dueDate });
       setTitle("");
