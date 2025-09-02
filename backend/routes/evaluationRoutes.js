@@ -5,11 +5,10 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 // Rotas existentes
 router.get('/stats', authMiddleware, evaluationController.getSystemStats);
-router.get('/charts/oee-by-user', authMiddleware, evaluationController.getOEEByUser);
 router.get('/user/:userId', authMiddleware, evaluationController.getEvaluationsByUser);
 router.post('/user/:userId', authMiddleware, evaluationController.createEvaluation);
 
-// --- NOVAS ROTAS PARA EDIÇÃO ---
+// --- ROTAS PARA EDIÇÃO E DETALHES ---
 router.get('/:id', authMiddleware, evaluationController.getEvaluationById);
 router.put('/:id', authMiddleware, evaluationController.updateEvaluation);
 

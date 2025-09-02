@@ -1,127 +1,102 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import api from '../../services/api';
+import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import Card from '../../components/Card/Card';
+import api from '../../services/api';
 import styles from './MyEvaluationsPage.module.css';
 
-// 1. Importações necessárias para o modal
-import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-content';
+const MyEvaluationsPage = () => {
+  const { userId: userIdFromParams } = useParams();
+  const { user: loggedInUser } = useAuth();
 
-// 2. Instância do SweetAlert (criada fora do componente para melhor performance)
-const MySwal = withReactContent(Swal);
-
-function MyEvaluationsPage() {
   const [evaluations, setEvaluations] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [evaluatedUser, setEvaluatedUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const { user } = useAuth();
 
   useEffect(() => {
-    if (!user) return;
+    // Determina qual ID de usuário usar para a busca.
+    const targetUserId = userIdFromParams || loggedInUser?.id;
 
-    const fetchEvaluations = async () => {
+    // **ESTA É A CORREÇÃO PRINCIPAL**
+    // Se ainda não temos um ID (pode acontecer enquanto o usuário logado carrega),
+    // nós simplesmente esperamos, mantendo a tela de "Carregando...".
+    if (!targetUserId) {
+      setIsLoading(true);
+      return;
+    }
+
+    const fetchEvaluationsAndUser = async () => {
       try {
-        const response = await api.get(`/evaluations/user/${user.userId}`);
-        setEvaluations(response.data);
+        setIsLoading(true);
+        setError('');
+
+        // Busca as avaliações do usuário alvo.
+        const evalResponse = await api.get(`/evaluations/user/${targetUserId}`);
+        setEvaluations(evalResponse.data);
+
+        // Se estivermos vendo o perfil de outra pessoa, busca os dados dela.
+        // Senão, usa os dados do usuário já logado.
+        if (userIdFromParams) {
+          const userResponse = await api.get(`/auth/users/${userIdFromParams}`);
+          setEvaluatedUser(userResponse.data);
+        } else {
+          setEvaluatedUser(loggedInUser);
+        }
+
       } catch (err) {
-        setError('Falha ao buscar suas avaliações.');
+        console.error("Erro detalhado ao buscar dados:", err);
+        setError('Falha ao carregar os dados. A avaliação ou usuário pode não existir.');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
-    fetchEvaluations();
-  }, [user]);
+    fetchEvaluationsAndUser();
 
-  // 3. Função de deletar ATUALIZADA com o modal
-  const handleDelete = (evaluationId) => {
-    MySwal.fire({
-      title: 'Tem certeza?',
-      text: 'Esta avaliação será excluída permanentemente!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Sim, excluir!',
-      cancelButtonText: 'Cancelar'
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          await api.delete(`/evaluations/${evaluationId}`);
-          // Atualiza a lista na tela sem precisar recarregar
-          setEvaluations(prev => prev.filter(ev => ev.id !== evaluationId));
+  }, [userIdFromParams, loggedInUser]);
 
-          MySwal.fire(
-            'Excluída!',
-            'A avaliação foi removida com sucesso.',
-            'success'
-          );
-        } catch (err) {
-          console.error("Erro ao excluir avaliação:", err);
-          MySwal.fire(
-            'Erro!',
-            'Não foi possível excluir a avaliação.',
-            'error'
-          );
-        }
-      }
-    });
-  };
-
-  if (loading) {
-    return <p>Carregando suas avaliações...</p>;
+  if (isLoading) {
+    return <p>Carregando avaliações...</p>;
   }
 
   if (error) {
     return <p className={styles.error}>{error}</p>;
   }
 
+  // Define o título da página dinamicamente
+  const pageTitle = userIdFromParams ? `Avaliações de ${evaluatedUser?.name}` : 'Minhas Avaliações';
+
   return (
     <div className={styles.container}>
-      <h1>Meu Histórico de Avaliações</h1>
-      <p>Acompanhe sua evolução e os feedbacks recebidos.</p>
-
-      <div className={styles.evaluationList}>
-        {evaluations.length > 0 ? (
-          evaluations.map(evaluation => (
-            <Card 
-              key={evaluation.id} 
-              title={`Avaliação de ${new Date(evaluation.createdAt).toLocaleDateString()}`}
-            >
-              <div className={styles.cardActions}>
-                {/* O botão agora chama a nova função handleDelete */}
-                <button onClick={() => handleDelete(evaluation.id)} className={styles.deleteButton}>Excluir</button>
-              </div>
-
-              <div className={styles.grid}>
-                <div>
-                  <h4>Avaliação Individual</h4>
-                  <p><strong>Conhecimento Técnico:</strong> {evaluation.technicalKnowledge_notes}</p>
-                  <p><strong>Certificações:</strong> {evaluation.certifications_notes}</p>
+      <h1>{pageTitle}</h1>
+      {evaluations.length > 0 ? (
+        <ul className={styles.evaluationList}>
+          {evaluations.map((evaluation) => (
+            <li key={evaluation.id} className={styles.evaluationItem}>
+              <Link to={`/evaluations/${evaluation.id}`} className={styles.evaluationLink}>
+                <div className={styles.evaluationInfo}>
+                  <span className={styles.date}>
+                    {new Date(evaluation.createdAt).toLocaleDateString()}
+                  </span>
+                  <span className={styles.evaluationTitle}>
+                    Avaliação de Desempenho
+                  </span>
                 </div>
-                <div>
-                  <h4>Avaliação de Desempenho</h4>
-                  <p><strong>Qualidade do Serviço (Nota):</strong> {evaluation.serviceQuality_score}</p>
-                  <p><strong>Iniciativa (Nota):</strong> {evaluation.problemSolvingInitiative_score}</p>
+                <div className={styles.scoreWrapper}>
+                  <span className={styles.scoreLabel}>Nota Final</span>
+                  <span className={styles.score}>
+                    {evaluation.finalScore?.toFixed(2) ?? 'N/A'}
+                  </span>
                 </div>
-                  <div>
-                  <h4>Avaliação Comportamental</h4>
-                  <p><strong>Trabalho em Equipe (Nota):</strong> {evaluation.teamwork_score}</p>
-                  <p><strong>Comprometimento (Nota):</strong> {evaluation.commitment_score}</p>
-                </div>
-              </div>
-            </Card>
-          ))
-        ) : (
-          <Card title="Nenhuma avaliação encontrada">
-            <p style={{textAlign:'center'}}>Você ainda não possui avaliações registradas.</p>
-          </Card>
-        )}
-      </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>Nenhuma avaliação registrada para este usuário.</p>
+      )}
     </div>
   );
-}
+};
 
 export default MyEvaluationsPage;

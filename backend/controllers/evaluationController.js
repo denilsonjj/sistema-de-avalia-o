@@ -1,18 +1,59 @@
-
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+// Objeto com os pesos de cada item da avaliação
+const evaluationWeights = {
+  quick_score: 1,
+  standard_score: 0.5,
+  qtdGeralManutencao_score: 0.5,
+  quebraMaior30minTurno_score: 1.5,
+  mttrTurno_score: 1,
+  qualidadeExecucaoEWO_score: 0.5,
+  tempoAberturaEWO_score: 0.5,
+  opeGeral_score: 0.5,
+  nonOpeBreak_score: 0.5,
+  absenteismo_score: 2,
+  saturacaoTrabalho_score: 1.5,
+  sugestoesSeguranca_score: 1,
+  cartoesRecebidos_score: 1,
+  zeroAcidenteTurno_score: 1.5,
+  condicoesAbertasArea_score: 0.5,
+  atendimentoUTE_score: 1,
+  avaliacaoTecnica_score: 1.5,
+  backlogManutencao_score: 1,
+  avaliacaoComportamental_score: 2,
+  qualidadeLancamentosSAP_score: 0.5,
+};
+
+// Função para calcular a nota final ponderada
+const calculateFinalScore = (data) => {
+  let totalScore = 0;
+  let totalWeight = 0;
+
+  for (const key in data) {
+    if (evaluationWeights[key] && data[key] !== null && data[key] !== undefined) {
+      totalScore += data[key] * evaluationWeights[key];
+      totalWeight += evaluationWeights[key];
+    }
+  }
+
+  return totalWeight > 0 ? totalScore / totalWeight : 0;
+};
 
 exports.createEvaluation = async (req, res) => {
   const { userId } = req.params;
-  const data = req.body; // O body agora terá os campos com _score e _notes
+  const data = req.body;
 
   try {
+    const finalScore = calculateFinalScore(data);
+    const evaluationData = {
+      userId: userId,
+      ...data,
+      finalScore: finalScore,
+    };
+
     const evaluation = await prisma.evaluation.create({
-      data: {
-        userId: userId,
-        ...data,
-      },
+      data: evaluationData,
     });
     res.status(201).json(evaluation);
   } catch (error) {
@@ -20,23 +61,25 @@ exports.createEvaluation = async (req, res) => {
   }
 };
 
-// ATUALIZAR UMA AVALIAÇÃO
 exports.updateEvaluation = async (req, res) => {
   const { id } = req.params;
   const data = req.body;
   try {
+    const finalScore = calculateFinalScore(data);
+    const evaluationData = {
+      ...data,
+      finalScore: finalScore,
+    };
+
     const updatedEvaluation = await prisma.evaluation.update({
       where: { id: id },
-      data: data,
+      data: evaluationData,
     });
     res.status(200).json(updatedEvaluation);
   } catch (error) {
     res.status(500).json({ message: 'Erro ao atualizar avaliação.', error: error.message });
   }      
 };
-
-
-
 
 exports.getEvaluationsByUser = async (req, res) => {
   const { userId } = req.params;
@@ -56,62 +99,17 @@ exports.getSystemStats = async (req, res) => {
   try {
     const userCount = await prisma.user.count();
     const evaluationCount = await prisma.evaluation.count();
-    const oeeAverages = await prisma.evaluation.aggregate({
-      _avg: {
-        availability: true,
-        performance: true,
-        quality: true,
-      },
-    });
-
-    const avgAvailability = oeeAverages._avg.availability || 0;
-    const avgPerformance = oeeAverages._avg.performance || 0;
-    const avgQuality = oeeAverages._avg.quality || 0;
-    const overallOEE = (avgAvailability / 100) * (avgPerformance / 100) * (avgQuality / 100);
+    
+    // O cálculo de OEE foi removido daqui pois não se aplica mais da mesma forma.
+    // Pode ser recalculado de outra forma se necessário.
 
     res.status(200).json({
       userCount,
       evaluationCount,
-      averageOEE: (overallOEE * 100).toFixed(2),
     });
 
   } catch (error) {
     res.status(500).json({ message: 'Erro ao calcular estatísticas.', error: error.message });
-  }
-};
-
-// Obter dados de OEE por usuário para gráficos
-exports.getOEEByUser = async (req, res) => {
-  try {
-    const evaluations = await prisma.evaluation.findMany({
-      include: {
-        user: {
-          select: { name: true },
-        },
-      },
-    });
-    const userEvals = evaluations.reduce((acc, eval) => {
-      const userName = eval.user.name;
-      if (!acc[userName]) {
-        acc[userName] = [];
-      }
-      acc[userName].push(eval);
-      return acc;
-    }, {});
-    const dataForChart = Object.keys(userEvals).map(userName => {
-      const evals = userEvals[userName];
-      const avgAvailability = evals.reduce((sum, e) => sum + e.availability, 0) / evals.length;
-      const avgPerformance = evals.reduce((sum, e) => sum + e.performance, 0) / evals.length;
-      const avgQuality = evals.reduce((sum, e) => sum + e.quality, 0) / evals.length;
-      const oee = (avgAvailability / 100) * (avgPerformance / 100) * (avgQuality / 100);
-      return {
-        name: userName,
-        oee: parseFloat((oee * 100).toFixed(2)),
-      };
-    });
-    res.status(200).json(dataForChart);
-  } catch (error) {
-    res.status(500).json({ message: 'Erro ao buscar dados de OEE por usuário.', error: error.message });
   }
 };
 

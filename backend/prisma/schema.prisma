@@ -46,7 +46,7 @@ model User {
   // Campos de Perfil
   technicalSkills     String?
   certifications      String?
-  avatarUrl           String? //foto do usuario
+  avatarUrl           String?
   
   // Relações
   productionLines     ProductionLine[]
@@ -66,23 +66,46 @@ model Evaluation {
   user   User   @relation(fields: [userId], references: [id])
   userId String
 
-  // Campos de Texto (Observações)
-  technicalKnowledge_notes       String
-  certifications_notes           String
-  experienceTime_notes           String
+  // --- CAMPOS DA NOVA AVALIAÇÃO BASEADA NA PLANILHA ---
 
-  // Campos de Pontuação Numérica (1-5)
-  serviceQuality_score           Int
-  executionTimeframe_score       Int
-  problemSolvingInitiative_score Int
-  teamwork_score                 Int
-  commitment_score               Int
-  proactivity_score              Int
+  // PROJETOS
+  quick_score                    Int?
+  standard_score                 Int?
 
-  // Indicadores OEE (%)
-  availability Float
-  performance  Float
-  quality      Float
+  // Notas
+  qtdGeralManutencao_score       Int?
+
+  // QUEBRA DE MÁQUINA
+  quebraMaior30minTurno_score    Int?
+  mttrTurno_score                Int?
+
+  // ANÁLISE DE QUEBRA
+  qualidadeExecucaoEWO_score     Int?
+  tempoAberturaEWO_score         Int?
+
+  // EFICIÊNCIA MONTAGEM
+  opeGeral_score                 Int?
+  nonOpeBreak_score              Int?
+
+  // ASSIDUIDADE
+  absenteismo_score              Int?
+  saturacaoTrabalho_score        Int?
+
+  // SEGURANÇA
+  sugestoesSeguranca_score       Int?
+  cartoesRecebidos_score         Int?
+  zeroAcidenteTurno_score        Int?
+  condicoesAbertasArea_score     Int?
+
+  // ENTREGA
+  atendimentoUTE_score           Int?
+  avaliacaoTecnica_score         Int?
+  backlogManutencao_score        Int?
+  avaliacaoComportamental_score  Int?
+  qualidadeLancamentosSAP_score  Int?
+  
+  // NOTA FINAL
+  finalScore                     Float?
 }
 
 model SelfAssessment {
