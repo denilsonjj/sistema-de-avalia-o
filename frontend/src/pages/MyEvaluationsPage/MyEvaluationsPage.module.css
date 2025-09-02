@@ -1,13 +1,15 @@
+/* frontend/src/pages/MyEvaluationsPage/MyEvaluationsPage.module.css */
 .container {
-  padding: 2rem;
   max-width: 900px;
   margin: 2rem auto;
+  padding: 1rem;
 }
 
 .container h1 {
   text-align: center;
   color: var(--color-primary);
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
+  font-size: 1.75rem;
 }
 
 .evaluationList {
@@ -20,15 +22,15 @@
 }
 
 .evaluationItem {
-  background-color: var(--color-background-light);
+  background-color: var(--color-surface);
   border-radius: 8px;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
   border: 1px solid var(--color-border);
 }
 
 .evaluationItem:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.07);
 }
 
 .evaluationLink {
@@ -43,12 +45,13 @@
 .evaluationInfo {
   display: flex;
   flex-direction: column;
+  gap: 0.25rem;
 }
 
 .date {
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+  color: #667085; /* Cor secundária mais suave */
+  font-weight: 500;
 }
 
 .evaluationTitle {
@@ -59,22 +62,36 @@
 
 .scoreWrapper {
   text-align: right;
+  border-left: 1px solid var(--color-border);
+  padding-left: 1.5rem;
+  margin-left: 1.5rem;
 }
 
 .scoreLabel {
   display: block;
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  color: #667085;
   text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
 }
 
 .score {
   font-size: 1.8rem;
-  font-weight: bold;
+  font-weight: 700;
   color: var(--color-primary);
 }
 
+.error, .noEvaluations {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #667085;
+  padding: 3rem;
+  background-color: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+}
+
 .error {
-    color: var(--color-danger);
-    text-align: center;
+    color: var(--color-tangerine-dark);
 }

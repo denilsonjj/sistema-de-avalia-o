@@ -73,7 +73,7 @@ const MyEvaluationsPage = () => {
         <ul className={styles.evaluationList}>
           {evaluations.map((evaluation) => (
             <li key={evaluation.id} className={styles.evaluationItem}>
-              <Link to={`/evaluations/${evaluation.id}`} className={styles.evaluationLink}>
+               <Link to={`/evaluations/${evaluation.id}`} className={styles.evaluationLink}>
                 <div className={styles.evaluationInfo}>
                   <span className={styles.date}>
                     {new Date(evaluation.createdAt).toLocaleDateString()}

@@ -4,13 +4,22 @@ import api from '../../services/api';
 import Card from '../../components/Card/Card';
 import CompetencyRadarChart from '../../components/charts/CompetencyRadarChart';
 import styles from './EvaluationDetailPage.module.css';
+import { evaluationCategories } from '../CreateEvaluationPage/evaluationFields';
+
+const getFieldLabel = (fieldName) => {
+  for (const category in evaluationCategories) {
+    const field = evaluationCategories[category].find(f => f.name === fieldName);
+    if (field) return field.label;
+  }
+  return fieldName;
+};
 
 function EvaluationDetailPage() {
-  const { userId } = useParams();
+  // Agora pegamos tanto userId quanto evaluationId dos parâmetros da URL
+  const { userId, evaluationId } = useParams();
   const [user, setUser] = useState(null);
-  const [evaluations, setEvaluations] = useState([]);
+  const [evaluation, setEvaluation] = useState(null); // Estado para uma única avaliação
   const [goals, setGoals] = useState([]);
-  const [oeeData, setOeeData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -19,52 +28,69 @@ function EvaluationDetailPage() {
       setLoading(true);
       setError('');
       try {
-        // 1. REMOVIDA a chamada para /oee/user/${userId} daqui
-        const [userRes, evalRes, goalsRes] = await Promise.all([
-          api.get(`/auth/users/${userId}`),
-          api.get(`/evaluations/user/${userId}`),
-          api.get(`/goals/user/${userId}`),
-        ]);
+        let currentEval;
+        let targetUserId;
 
-        setUser(userRes.data);
-        setEvaluations(evalRes.data);
-        setGoals(goalsRes.data);
+        if (evaluationId) {
+          // Cenário 1: Carrega pela ID da avaliação
+          const evalRes = await api.get(`/evaluations/${evaluationId}`);
+          currentEval = evalRes.data;
+          setEvaluation(currentEval);
+          targetUserId = currentEval.userId; // Pega o ID do usuário a partir da avaliação
+        } else if (userId) {
+          // Cenário 2: Carrega as avaliações do usuário e pega a mais recente
+          targetUserId = userId;
+          const evalRes = await api.get(`/evaluations/user/${userId}`);
+          if (evalRes.data && evalRes.data.length > 0) {
+            currentEval = evalRes.data[0];
+            setEvaluation(currentEval);
+          }
+        }
 
-        // 2. CÁLCULO DO OEE feito a partir dos dados de avaliações (evalRes.data)
-        if (evalRes.data && evalRes.data.length > 0) {
-          const validEvals = evalRes.data; // Já temos as avaliações aqui
-          const avgPerformance = validEvals.reduce((sum, item) => sum + item.performance, 0) / validEvals.length;
-          const avgQuality = validEvals.reduce((sum, item) => sum + item.quality, 0) / validEvals.length;
-          const avgAvailability = validEvals.reduce((sum, item) => sum + item.availability, 0) / validEvals.length;
-          
-          const overallOEE = (avgAvailability / 100) * (avgPerformance / 100) * (avgQuality / 100);
-
-          setOeeData({
-            performance: avgPerformance,
-            quality: avgQuality,
-            availability: avgAvailability,
-            overall: overallOEE * 100, // Armazena o OEE final em percentual
-          });
+        // Se encontramos um usuário, busca os dados dele e suas metas
+        if (targetUserId) {
+          const [userRes, goalsRes] = await Promise.all([
+            api.get(`/auth/users/${targetUserId}`),
+            api.get(`/goals/user/${targetUserId}`),
+          ]);
+          setUser(userRes.data);
+          setGoals(goalsRes.data);
+        } else {
+           // Se não há targetUserId (usuário sem avaliação clicado via /equipe/:userId)
+           const userRes = await api.get(`/auth/users/${userId}`);
+           setUser(userRes.data);
         }
 
       } catch (err) {
-        setError('Não foi possível carregar os dados completos. Verifique se o usuário possui avaliações cadastradas.');
-        console.error("Erro ao buscar dados:", err); // Adicionado para debug
+        setError('Não foi possível carregar os dados. A avaliação ou usuário pode não existir.');
+        console.error("Erro ao buscar dados:", err);
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, [userId]);
+  }, [userId, evaluationId]);
 
   if (loading) return <p>Carregando relatório...</p>;
   if (error) return <p className={styles.error}>{error}</p>;
 
-  // A lógica para pegar a última avaliação permanece a mesma
-  const latestEvaluation = evaluations[0];
-  
-  // 3. CORREÇÃO na exibição dos dados de OEE
-  const oeePercentage = oeeData ? oeeData.overall.toFixed(2) : "0.00";
+  // O ID do usuário para os botões de ação
+  const actionUserId = user?.id || userId;
+
+  const renderEvaluationDetails = () => {
+    if (!evaluation) return null;
+    const scoreFields = Object.keys(evaluation).filter(key => key.endsWith('_score'));
+    return (
+      <div className={styles.detailsGrid}>
+        {scoreFields.map(field => (
+          <div key={field} className={styles.detailItem}>
+            <span className={styles.detailLabel}>{getFieldLabel(field)}</span>
+            <span className={styles.detailValue}>{evaluation[field] !== null ? evaluation[field] : 'N/A'}</span>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className={styles.page}>
@@ -74,77 +100,45 @@ function EvaluationDetailPage() {
           <p className={styles.userName}>{user?.name}</p>
         </div>
         <div className={styles.headerActions}>
-          <Link to={`/equipe/${userId}/nova-avaliacao`} className={`${styles.actionButton} ${styles.primary}`}>
+          <Link to={`/equipe/${actionUserId}/nova-avaliacao`} className={`${styles.actionButton} ${styles.primary}`}>
             + Nova Avaliação
           </Link>
-          <Link to={`/equipe/${userId}/atribuir-meta`} className={`${styles.actionButton} ${styles.secondary}`}>
+          <Link to={`/equipe/${actionUserId}/atribuir-meta`} className={`${styles.actionButton} ${styles.secondary}`}>
             + Atribuir Meta
           </Link>
         </div>
       </div>
 
       <div className={styles.grid}>
-        {oeeData ? (
+        {evaluation ? (
           <>
-            <div className={styles.oeeCard}>
-              <div className={styles.oeeValue}>{oeePercentage}%</div>
-              <div className={styles.oeeLabel}>OEE Real (Média)</div>
-            </div>
-            <div className={styles.indicatorCard}>
-              <div className={styles.indicatorLabel}>Performance (P)</div>
-              {/* Corrigido o "P" maiúsculo e a lógica da barra */}
-              <div className={styles.indicatorValue}>{oeeData.performance.toFixed(2)}%</div>
-              <div className={styles.progressBar}><div style={{ width: `${oeeData.performance}%`, backgroundColor: '#eca935' }}></div></div>
-            </div>
-            <div className={styles.indicatorCard}>
-              <div className={styles.indicatorLabel}>Qualidade (Q)</div>
-              <div className={styles.indicatorValue}>{oeeData.quality.toFixed(2)}%</div>
-              <div className={styles.progressBar}><div style={{ width: `${oeeData.quality}%`, backgroundColor: '#ec94a2' }}></div></div>
-            </div>
-          </>
-        ) : (
-            <div className={`${styles.largeCard} ${styles.fullWidth}`}>
-                <p>Dados de OEE real ainda não disponíveis para este usuário.</p>
-            </div>
-        )}
-
-        {/* Esta parte agora deve funcionar, pois 'latestEvaluation' receberá os dados */}
-        {latestEvaluation ? (
-          <>
+            {evaluation.finalScore != null && (
+              <div className={styles.oeeCard}>
+                <div className={styles.oeeValue}>{evaluation.finalScore.toFixed(2)}</div>
+                <div className={styles.oeeLabel}>Nota Final da Avaliação</div>
+              </div>
+            )}
             <div className={`${styles.largeCard} ${styles.radarCard}`}>
               <h3 className={styles.cardTitle}>Radar de Competências</h3>
-              <CompetencyRadarChart evaluationData={latestEvaluation} />
+              <CompetencyRadarChart evaluationData={evaluation} />
             </div>
             <div className={`${styles.largeCard} ${styles.detailsCard}`}>
-              <h3 className={styles.cardTitle}>Observações da Última Avaliação</h3>
-              <div className={styles.detailItem}>
-                <h4>Conhecimento Técnico</h4>
-                <p>{latestEvaluation.technicalKnowledge_notes}</p>
-              </div>
-              <div className={styles.detailItem}>
-                <h4>Certificações</h4>
-                <p>{latestEvaluation.certifications_notes}</p>
-              </div>
-              <div className={styles.detailItem}>
-                <h4>Tempo de Experiência</h4>
-                <p>{latestEvaluation.experienceTime_notes}</p>
-              </div>
+              <h3 className={styles.cardTitle}>Detalhes da Avaliação</h3>
+              {renderEvaluationDetails()}
             </div>
           </>
         ) : (
             <div className={`${styles.largeCard} ${styles.fullWidth}`}>
-                <p>Nenhuma avaliação manual com observações encontrada para este usuário.</p>
+                <p>Nenhuma avaliação encontrada para este usuário.</p>
             </div>
         )}
 
-        {/* Painel de Metas */}
         <div className={`${styles.largeCard} ${styles.goalsCard}`}>
           <h3 className={styles.cardTitle}>Plano de Desenvolvimento (Metas)</h3>
           <div className={styles.goalsContainer}>
             {goals.length > 0 ? (
               goals.map(goal => (
                 <div key={goal.id} className={`${styles.goalItem} ${styles[goal.status.toLowerCase()]}`}>
-                  <span className={styles.goalStatus}>{goal.status.replace('_', ' ')}</span>
                   <p className={styles.goalTitle}>{goal.title}</p>
                   <small>Criado por: {goal.author.name}</small>
                 </div>

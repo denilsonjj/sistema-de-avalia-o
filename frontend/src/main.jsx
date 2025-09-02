@@ -51,6 +51,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: '/evaluations/:evaluationId', 
+        element: (
+          <ProtectedRoute>
+            <EvaluationDetailPage /> 
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: '/equipe',
         element: <ProtectedRoute><TeamDashboardPage /></ProtectedRoute>,
       },

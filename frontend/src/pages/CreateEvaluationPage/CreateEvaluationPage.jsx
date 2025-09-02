@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import styles from './CreateEvaluationPage.module.css';
-import { evaluationCategories } from './evaluationFields'; // Importando a nova estrutura
+import { evaluationCategories } from './evaluationFields'; 
 
 const CreateEvaluationPage = () => {
   const { userId } = useParams();
@@ -28,7 +28,6 @@ const CreateEvaluationPage = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    // Garante que o valor seja um número inteiro ou nulo se o campo estiver vazio
     const score = value ? parseInt(value, 10) : null;
     setEvaluationData(prev => ({
       ...prev,
@@ -41,7 +40,6 @@ const CreateEvaluationPage = () => {
     setIsLoading(true);
     setError('');
 
-    // Filtra para não enviar campos vazios (null)
     const dataToSend = Object.entries(evaluationData).reduce((acc, [key, value]) => {
       if (value !== null && value !== undefined) {
         acc[key] = value;
@@ -50,10 +48,9 @@ const CreateEvaluationPage = () => {
     }, {});
 
     try {
-      const response = await api.post(`/evaluations/user/${userId}`, dataToSend);
-      const newEvaluationId = response.data.id;
+      await api.post(`/evaluations/user/${userId}`, dataToSend);
       alert('Avaliação criada com sucesso!');
-      navigate(`/evaluations/${newEvaluationId}`);
+      navigate(`/equipe/${userId}`);
     } catch (err) {
       setError('Erro ao criar avaliação. ' + (err.response?.data?.message || err.message));
     } finally {

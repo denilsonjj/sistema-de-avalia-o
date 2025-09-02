@@ -1,189 +1,307 @@
-/* frontend/src/pages/EvaluationDetailPage/EvaluationDetailPage.module.css */
-.page {
-  animation: fadeIn 0.5s ease-in-out;
+/* Animação de entrada para a página */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+.page {
+  animation: fadeIn 0.45s ease-in-out;
+  padding: 1.25rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* --- Cabeçalho --- */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--color-border);
 }
+
 .header h1 {
   margin: 0;
   color: var(--color-primary);
+  font-size: 1.45rem;
 }
+
 .userName {
-  margin: 0;
-  font-size: 1.2rem;
+  margin: 0.25rem 0 0;
   color: var(--color-text);
+  opacity: 0.85;
+  font-size: 0.95rem;
 }
-.actionButton {
-  text-decoration: none;
-  color: white;
-  padding: 0.8rem 1.5rem;
-  border-radius: 5px;
-  font-weight: 700;
-}
-.actionButton.primary { background-color: var(--color-primary); }
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-}
-
-.oeeCard, .indicatorCard {
-  background: var(--color-surface);
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  border: 1px solid var(--color-border);
-}
-
-.oeeCard {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--color-primary);
-  color: white;
-}
-.oeeValue { font-size: 2.5rem; font-weight: 800; }
-.oeeLabel { font-size: 1.1rem; font-weight: 600; }
-
-.indicatorLabel { font-weight: 600; margin-bottom: 0.5rem; }
-.indicatorValue { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
-.progressBar {
-  height: 8px;
-  width: 100%;
-  background-color: #e0e0e0;
-  border-radius: 4px;
-  overflow: hidden;
-}
-.progressBar div {
-  height: 100%;
-  border-radius: 4px;
-}
-
-.largeCard {
-  grid-column: span 2;
-  background: var(--color-surface);
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  border: 1px solid var(--color-border);
-}
-
-.cardTitle {
-  margin-top: 0;
-  text-align: center;
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 0.8rem;
-  margin-bottom: 1.5rem;
-}
-
-.detailItem h4 {
-  margin-bottom: 0.5rem;
-  color: var(--color-primary);
-}
-.detailItem p {
-  margin-top: 0;
-}
-/* Adicione no final do EvaluationDetailPage.module.css */
-.goalsCard {
-  grid-column: span 4; /* Faz o card ocupar a largura total */
-}
-
-.goalsContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.goalItem {
-  padding: 1rem;
-  border-radius: 5px;
-  border-left: 5px solid;
-  background-color: var(--color-background);
-}
-
-.goalItem.pendente { border-color: var(--color-orange); }
-.goalItem.em_andamento { border-color: var(--color-tangerine); }
-.goalItem.concluida { border-color: var(--color-mint); }
-
-.goalItem.concluida .goalTitle {
-    text-decoration: line-through;
-    color: #888;
-}
-
-.goalStatus {
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.2rem 0.5rem;
-  border-radius: 10px;
-  color: white;
-  text-transform: uppercase;
-}
-
-.pendente .goalStatus { background-color: var(--color-orange); }
-.em_andamento .goalStatus { background-color: var(--color-tangerine); }
-.concluida .goalStatus { background-color: var(--color-mint); }
-
-.goalTitle {
-  font-weight: 600;
-  margin: 0.5rem 0;
-}
-
-.goalItem small {
-  font-style: italic;
-  color: #888;
-}
-
 
 .headerActions {
   display: flex;
-  gap: 1rem; 
+  gap: 0.6rem;
+  align-items: center;
 }
 
+.actionButton {
+  text-decoration: none;
+  color: var(--color-text-on-primary);
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  box-shadow: 0 6px 18px rgba(20, 30, 60, 0.06);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.actionButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(20, 30, 60, 0.1);
+  filter: brightness(1.1);
+}
+
+.actionButton.primary {
+  background: var(--color-primary);
+}
 .actionButton.secondary {
-  background-color: var(--color-mint); 
+  background: var(--color-mint);
 }
 
-.actionButton.secondary:hover {
-  background-color: var(--color-mint-dark);
+/* --- Layout do Grid Principal --- */
+.grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 1.2rem;
+  align-items: start;
+}
+
+/* --- Estilos Base dos Cards --- */
+.card {
+  background: var(--color-surface);
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 8px 20px rgba(20, 30, 60, 0.04);
+  overflow: hidden;
+}
+
+.cardTitle {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* Card de Nota Final */
+.oeeCard {
+  grid-column: 1 / -1;
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-on-primary);
+  background: linear-gradient(135deg, var(--color-primary), rgba(20, 30, 60, 0.85));
+}
+
+.oeeValue {
+  font-size: 3rem;
+  font-weight: 800;
+}
+.oeeLabel {
+  margin-top: 0.35rem;
+  opacity: 0.95;
+  font-weight: 600;
+}
+
+/* Cards Grandes */
+.largeCard {
+  padding: 0;
+}
+.radarCard {
+  grid-column: 1 / 2;
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+}
+.detailsCard {
+  grid-column: 2 / 3;
+  min-height: 340px;
+}
+
+/* Detalhes da Avaliação */
+.detailsGrid {
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+.detailItem {
+  padding: 0.7rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.02), transparent);
+  border: 1px solid var(--color-border);
+}
+.detailLabel {
+  color: var(--color-text);
+  font-weight: 600;
+}
+.detailValue {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* --- Plano de Desenvolvimento (Metas) - DESIGN MELHORADO --- */
+.goalsCard {
+  grid-column: 1 / -1;
+}
+
+.goalsContainer {
+  padding: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.goalItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 8px;
+  background: var(--color-surface);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-left-width: 6px;
+  box-shadow: 0 6px 16px rgba(20, 30, 60, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.goalItem:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(20, 30, 60, 0.08);
+}
+
+.goalInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.goalTitle {
+  margin: 0 0 0.25rem 0;
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.goalAuthor {
+  font-size: 0.8rem;
+  color: var(--color-text);
+  opacity: 0.6;
+}
+
+/* Ícone de seta interativo no hover */
+.goalItem::after {
+  content: '→';
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%) translateX(10px);
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.goalItem:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Cores das bordas por status */
+.goalItem.pendente { border-left-color: var(--color-tangerine); }
+.goalItem.em_andamento { border-left-color: var(--color-mint); }
+.goalItem.concluida { border-left-color: var(--color-orange); }
+
+.goalItem.concluida .goalTitle {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* --- Badges de Status das Metas --- */
+.statusBadge {
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Cores dos badges (ajuste as cores se necessário) */
+.statusPendente {
+  color: #8D4A0D;
+  background-color: rgba(255, 165, 0, 0.15);
+}
+
+.statusEm_andamento { /* Nome da classe deve corresponder ao valor do status */
+  color: #005C5C;
+  background-color: rgba(0, 255, 255, 0.15);
+}
+
+.statusConcluida {
+  color: #7A3B00;
+  background-color: rgba(255, 127, 80, 0.2);
 }
 
 
-@media (max-width: 900px) {
+/* --- TEMA ESCURO (COM CORREÇÃO) --- */
+body[data-theme='dark'] .goalItem {
+  /* AQUI ESTÁ A CORREÇÃO: definimos a borda geral E a espessura da borda esquerda */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left-width: 6px; /* Isso impede que a cor da borda de status seja apagada */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+body[data-theme='dark'] .goalItem:hover {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+}
+
+
+/* --- Fallback e Responsividade --- */
+.fullWidth {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+}
+
+@media (max-width: 1000px) {
   .grid {
-    /* Em telas de tablet, passamos para 2 colunas */
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .largeCard, .goalsCard {
-    /* Cards grandes ocupam a largura toda */
-    grid-column: span 2;
-  }
-}
-
-@media (max-width: 600px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .grid {
-    /* Em telas de celular, passamos para 1 coluna */
     grid-template-columns: 1fr;
   }
-
-  .oeeCard, .indicatorCard, .largeCard, .goalsCard {
-    /* Todos os cards agora ocupam a largura toda */
-    grid-column: span 1;
+  .radarCard,
+  .detailsCard {
+    grid-column: 1 / -1;
+    min-height: 300px;
+  }
+  .detailsGrid {
+    grid-template-columns: 1fr;
   }
 }
