@@ -16,6 +16,9 @@ import styles from "./GoalsPage.module.css";
 import { FaTrashAlt } from "react-icons/fa";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
 
 const MySwal = withReactContent(Swal);
 
@@ -248,17 +251,24 @@ function GoalsPage() {
   return (
     <div>
       <h1 className="titlePage">Plano de Desenvolvimento</h1>
+
       <div className={styles.formCard}>
         <form onSubmit={handleCreateGoal}>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Adicionar uma nova meta..."
-          />
-          <button type="submit" disabled={submitting}>
-            {submitting ? "Salvando..." : "+ Adicionar Meta"}
-          </button>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center", width: "100%" }}>
+            <TextField
+              id="goal-title"
+              label="Adicionar nova meta"
+              variant="outlined"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              size="small"
+              fullWidth
+              inputProps={{ maxLength: 250 }}
+            />
+            <Button type="submit" variant="contained" color="primary" disabled={submitting}>
+              {submitting ? "Salvando..." : "+ Adicionar Meta"}
+            </Button>
+          </Box>
         </form>
       </div>
 

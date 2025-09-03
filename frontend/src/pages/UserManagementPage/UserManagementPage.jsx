@@ -116,7 +116,7 @@ function UserManagementPage() {
           <table className={styles.userTable}>
             <thead>
               <tr>
-                <th style={{ width: '60px' }}></th> {/* Espaço para o Avatar */}
+                <th style={{ width: '60px' }}></th>
                 <th>Nome</th>
                 <th>Email</th>
                 <th>Perfil</th>

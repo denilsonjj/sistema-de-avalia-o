@@ -2,7 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import styles from './CreateEvaluationPage.module.css';
-import { evaluationCategories } from './evaluationFields'; 
+import { evaluationCategories } from './evaluationFields';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 
 const CreateEvaluationPage = () => {
   const { userId } = useParams();
@@ -26,13 +35,9 @@ const CreateEvaluationPage = () => {
     }
   }, [userId]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    const score = value ? parseInt(value, 10) : null;
-    setEvaluationData(prev => ({
-      ...prev,
-      [name]: score
-    }));
+  const handleSelectChange = (name, value) => {
+    const score = value !== '' && value !== null ? Number(value) : null;
+    setEvaluationData(prev => ({ ...prev, [name]: score }));
   };
 
   const handleSubmit = async (e) => {
@@ -49,7 +54,7 @@ const CreateEvaluationPage = () => {
 
     try {
       await api.post(`/evaluations/user/${userId}`, dataToSend);
-      alert('Avaliação criada com sucesso!');
+      // feedback simples e redireciona
       navigate(`/equipe/${userId}`);
     } catch (err) {
       setError('Erro ao criar avaliação. ' + (err.response?.data?.message || err.message));
@@ -58,42 +63,51 @@ const CreateEvaluationPage = () => {
     }
   };
 
+  const scoreOptions = [1, 2, 3, 4, 5];
+
   return (
     <div className={styles.container}>
-      <h2>Criar Nova Avaliação para {user?.name || '...'}</h2>
-      {error && <p className={styles.error}>{error}</p>}
-      
+      <Typography variant="h5" component="h2" gutterBottom>
+        Criar Nova Avaliação para {user?.name || '...'}
+      </Typography>
+
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
       <form onSubmit={handleSubmit} className={styles.form}>
         {Object.entries(evaluationCategories).map(([category, fields]) => (
           <fieldset key={category} className={styles.fieldset}>
             <legend className={styles.legend}>{category}</legend>
-            <div className={styles.fieldsGrid}>
+            <Box className={styles.fieldsGrid} sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 2 }}>
               {fields.map(field => (
-                <div key={field.name} className={styles.formGroup}>
-                  <label htmlFor={field.name}>{field.label}</label>
-                  <select
+                <FormControl key={field.name} fullWidth size="small" variant="outlined" sx={{ mb: 0 }}>
+                  <InputLabel id={`label-${field.name}`}>{field.label}</InputLabel>
+                  <Select
+                    labelId={`label-${field.name}`}
                     id={field.name}
-                    name={field.name}
-                    value={evaluationData[field.name] || ''}
-                    onChange={handleInputChange}
-                    className={styles.selectInput}
+                    value={evaluationData[field.name] ?? ''}
+                    label={field.label}
+                    onChange={(e) => handleSelectChange(field.name, e.target.value)}
+                    renderValue={(v) => (v === '' ? 'Selecione a pontuação' : v)}
                   >
-                    <option value="">Selecione a pontuação</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                  </select>
-                </div>
+                    <MenuItem value="">
+                      <em>Selecione a pontuação</em>
+                    </MenuItem>
+                    {scoreOptions.map((s) => (
+                      <MenuItem key={s} value={s}>{s}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               ))}
-            </div>
+            </Box>
           </fieldset>
         ))}
 
-        <button type="submit" disabled={isLoading} className={styles.submitButton}>
-          {isLoading ? 'Salvando...' : 'Salvar Avaliação'}
-        </button>
+        <Box sx={{ mt: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
+          <Button type="submit" variant="contained" color="primary" disabled={isLoading}>
+            {isLoading ? <CircularProgress size={20} color="inherit" /> : 'Salvar Avaliação'}
+          </Button>
+          <Button variant="outlined" onClick={() => navigate(-1)}>Cancelar</Button>
+        </Box>
       </form>
     </div>
   );

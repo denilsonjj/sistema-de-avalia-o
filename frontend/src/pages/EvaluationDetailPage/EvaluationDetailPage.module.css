@@ -131,6 +131,7 @@
   min-height: 340px;
   display: flex;
   flex-direction: column;
+  width: 350px;
 }
 .detailsCard {
   grid-column: 2 / 3;

@@ -11,7 +11,6 @@ import {
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import Select from "react-select";
 import DatePicker from "react-datepicker";
-//import { registerLocale } from "react-datepicker";l
 import ptBR from "date-fns/locale/pt-BR";
 import api from "../../services/api";
 import styles from "./TeamGoalsPage.module.css";
@@ -19,7 +18,6 @@ import TeamGoalCard from "../../components/Card/TeamGoalCard";
 import Card from "../../components/Card/Card";
 import { useTheme } from "../../context/ThemeContext";
 
-//registerLocale("pt-BR", ptBR);
 
 const customSelectStyles = (theme) => ({
   control: (provided) => ({

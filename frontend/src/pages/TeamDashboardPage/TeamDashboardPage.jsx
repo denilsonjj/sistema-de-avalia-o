@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import Card from '../../components/Card/Card';
-import Avatar from '../../components/Avatar/Avatar'; 
+import Avatar from '../../components/Avatar/Avatar'
 import styles from './TeamDashboardPage.module.css';
 import { FaChartLine } from 'react-icons/fa'; 
 

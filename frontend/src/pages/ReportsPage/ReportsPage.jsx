@@ -3,7 +3,7 @@ import api from '../../services/api';
 import Card from '../../components/Card/Card';
 import EvaluationsLineChart from '../../components/charts/EvaluationsLineChart';
 import styles from './ReportsPage.module.css';
-import { FaFileExcel } from 'react-icons/fa'; // Importar ícone
+import { FaFileExcel } from 'react-icons/fa'; 
 
 function ReportsPage() {
   const [evaluationsData, setEvaluationsData] = useState([]);

@@ -82,6 +82,7 @@ function PmmDashboardPage() {
   ? oeeOverview.reduce((sum, line) => sum + line.Performance, 0) / oeeOverview.length 
   : 0;
 
+
   return (
     <div className={styles.container}>
       <h1>Dashboard PMM - Visão Geral</h1>

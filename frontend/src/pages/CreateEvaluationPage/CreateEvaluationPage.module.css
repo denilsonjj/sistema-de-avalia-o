@@ -1,91 +1,113 @@
+/* Estilos para CreateEvaluationPage - integrado ao tema do projeto */
+
 .container {
-  padding: 2rem;
-  background-color: var(--color-background-light);
-  border-radius: 8px;
-  max-width: 1000px;
-  margin: 2rem auto;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1.25rem;
+  animation: fadeIn 0.35s ease;
 }
 
-.container h2 {
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+h2, .title {
   color: var(--color-primary);
-  margin-bottom: 2rem;
-  text-align: center;
+  margin: 0 0 0.75rem 0;
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
 .form {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 8px 20px rgba(20,30,60,0.04);
 }
 
 .fieldset {
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 1.5rem;
-  background-color: var(--color-background);
+  border: none;
+  margin: 0 0 1rem 0;
+  padding: 0;
 }
 
 .legend {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: var(--color-text);
-  padding: 0 0.5rem;
-  margin-left: 1rem;
+  display: block;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  padding: 0.25rem 0;
 }
 
 .fieldsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+  width: 100%;
+  gap: 0.75rem;
 }
 
-.formGroup {
-  display: flex;
-  flex-direction: column;
-}
-
-.formGroup label {
+/* Pequenos ajustes visuais para MUI FormControl / Select dentro do módulo */
+.form .MuiFormControl-root {
   margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
 }
 
-.selectInput {
-  padding: 0.8rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background-color: var(--color-input-background);
+/* Garante espaçamento interno e leitura do Select/Inputs */
+.form .MuiInputBase-root {
+  background: transparent;
   color: var(--color-text);
-  font-size: 1rem;
 }
 
-.submitButton {
-  align-self: flex-end;
-  padding: 0.8rem 1.5rem;
-  background-color: var(--color-primary);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: bold;
-  transition: background-color 0.2s ease;
+/* Força a label ficar visível em ambos os temas */
+.form .MuiInputLabel-root {
+  color: var(--color-text);
+  opacity: 0.85;
 }
 
-.submitButton:hover {
-  background-color: var(--color-primary-dark);
+/* Ajuste do outline (outlined variant) */
+.form .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-border);
 }
 
-.submitButton:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+/* Placeholder / texto de inputs MUI */
+.form .MuiInputBase-input {
+  color: var(--color-text);
 }
 
-.error {
-  color: var(--color-danger);
-  background-color: var(--color-danger-light);
-  padding: 1rem;
-  border-radius: 4px;
+/* Botões */
+.actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* Mensagens/alertas com espaçamento */
+.alert {
   margin-bottom: 1rem;
-  text-align: center;
+}
+
+/* Responsivo */
+@media (max-width: 760px) {
+  .fieldsGrid { display: grid; grid-template-columns: 1fr; }
+  .actions { flex-direction: column; align-items: stretch; }
+}
+
+/* Tema escuro tweaks: utiliza as variáveis já definidas no projeto */
+body[data-theme='dark'] .form {
+  background: var(--color-surface);
+  border-color: rgba(255,255,255,0.06);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+}
+
+body[data-theme='dark'] .form .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255,255,255,0.06);
+}
+
+body[data-theme='dark'] .form .MuiInputLabel-root {
+  color: rgba(230,230,230,0.9);
+}
+
+body[data-theme='dark'] .form .MuiInputBase-input {
+  color: var(--color-text);
 }
