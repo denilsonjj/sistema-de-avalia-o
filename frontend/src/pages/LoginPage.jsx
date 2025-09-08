@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../services/api'; // <<< CORREÇÃO AQUI
+import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import styles from './LoginPage.module.css';
+import TextField from '@mui/material/TextField'
 
 function LoginPage() {
   const [email, setEmail] = useState('');
@@ -33,18 +34,20 @@ function LoginPage() {
       <div className={styles.loginBox}>
         <h2 className={styles.title}>Sistema de Gestão e Avaliação</h2>
         <form className={styles.form} onSubmit={handleSubmit}>
-          <input
-            type="email"
-            placeholder="E-mail"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Senha"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+
+          <TextField className='input'
+           fullWidth 
+           margin='normal'
+           id="outlined-basic" label="Email" variant="outlined"
+           value={email} 
+           onChange={e=> setEmail(e.target.value)} />
+
+          <TextField fullWidth
+          margin='normal'
+          id="outlined-basic" label="Senha" variant="outlined"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          />  
           {error && <p className={styles.errorText}>{error}</p>}
           <button type="submit">
             Entrar

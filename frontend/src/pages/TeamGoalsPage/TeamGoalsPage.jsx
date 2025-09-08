@@ -8,54 +8,20 @@ import {
   closestCorners,
   useDroppable,
 } from "@dnd-kit/core";
-import { SortableContext, arrayMove } from "@dnd-kit/sortable";
-import Select from "react-select";
+import { SortableContext } from "@dnd-kit/sortable";
 import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css"; // Importe o CSS do DatePicker
 import ptBR from "date-fns/locale/pt-BR";
 import api from "../../services/api";
 import styles from "./TeamGoalsPage.module.css";
 import TeamGoalCard from "../../components/Card/TeamGoalCard";
 import Card from "../../components/Card/Card";
 import { useTheme } from "../../context/ThemeContext";
+import TextField from "@mui/material/TextField";
+import { FormControl, Select, InputLabel, MenuItem } from "@mui/material";
 
-
-const customSelectStyles = (theme) => ({
-  control: (provided) => ({
-    ...provided,
-    backgroundColor: theme === "dark" ? "#1e2129" : "#ffffff",
-    borderColor: theme === "dark" ? "#313642" : "#dce1e6",
-    minHeight: "46px",
-    height: "46px",
-  }),
-  singleValue: (provided) => ({
-    ...provided,
-    color: theme === "dark" ? "#e1e1e1" : "#282b34",
-  }),
-  menu: (provided) => ({
-    ...provided,
-    backgroundColor: theme === "dark" ? "#1e2129" : "#ffffff",
-  }),
-  option: (provided, state) => ({
-    ...provided,
-    backgroundColor: state.isSelected
-      ? theme === "dark"
-        ? "#5a7ec7"
-        : "#243782"
-      : state.isFocused
-      ? theme === "dark"
-        ? "#313642"
-        : "#e8eaf6"
-      : "transparent",
-    color: state.isSelected
-      ? "white"
-      : theme === "dark"
-      ? "#e1e1e1"
-      : "#282b34",
-  }),
-  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-});
-
-function Column({ id, title, goals }) {
+//         Receba a prop aqui V
+function Column({ id, title, goals, onDeleteGoal }) { 
   const { setNodeRef } = useDroppable({ id });
   return (
     <div ref={setNodeRef} className={styles.column}>
@@ -63,7 +29,11 @@ function Column({ id, title, goals }) {
       <SortableContext items={goals.map((g) => g.id)}>
         <div className={styles.cardList}>
           {goals.map((goal) => (
-            <TeamGoalCard key={goal.id} goal={goal} />
+            <TeamGoalCard
+              key={goal.id}
+              goal={goal}
+              onDelete={onDeleteGoal} // <-- REPASSE A PROP AQUI
+            />
           ))}
         </div>
       </SortableContext>
@@ -81,7 +51,10 @@ function TeamGoalsPage() {
   const [loading, setLoading] = useState(true);
   const [activeGoal, setActiveGoal] = useState(null);
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
+  
+  // --- MUDANÇA 1: Estado inicial do selectedUser ---
+  const [selectedUser, setSelectedUser] = useState(""); // Usar string vazia é melhor para o Select da MUI
+  
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState(null);
   const sensors = useSensors(
@@ -94,11 +67,28 @@ function TeamGoalsPage() {
         api.get("/goals"),
         api.get("/auth/users"),
       ]);
+  
+      const allGoals = goalsRes.data;
+  
+      // ====================================================================
+      // SOLUÇÃO: Limpa os dados, garantindo que cada ID seja único
+      // Isso preserva a regra de negócio (mostrar todas as metas),
+      // mas corrige o bug do drag-and-drop.
+      const uniqueGoals = Array.from(new Map(allGoals.map(goal => [goal.id, goal])).values());
+  
+      if (allGoals.length !== uniqueGoals.length) {
+          console.warn("AVISO: Foram removidas metas com IDs duplicados que vieram da API /goals.");
+      }
+      // ====================================================================
+  
+      // Agora, use a lista limpa ('uniqueGoals') para popular as colunas
       setColumns({
-        PENDENTE: goalsRes.data.filter((g) => g.status === "PENDENTE"),
-        EM_ANDAMENTO: goalsRes.data.filter((g) => g.status === "EM_ANDAMENTO"),
-        CONCLUIDA: goalsRes.data.filter((g) => g.status === "CONCLUIDA"),
+        PENDENTE: uniqueGoals.filter((g) => g.status === "PENDENTE"),
+        EM_ANDAMENTO: uniqueGoals.filter((g) => g.status === "EM_ANDAMENTO"),
+        CONCLUIDA: uniqueGoals.filter((g) => g.status === "CONCLUIDA"),
       });
+  
+      // O resto da sua função continua igual...
       const userOptions = usersRes.data.map((user) => ({
         value: user.id,
         label: user.name,
@@ -120,16 +110,46 @@ function TeamGoalsPage() {
     if (!title.trim() || !selectedUser) {
       alert("Por favor, preencha o título e selecione um responsável.");
       return;
-}
+    }
     try {
-      await api.post("/goals", { userId: selectedUser.value, title, dueDate });
+      // --- MUDANÇA 2: Correção no envio do ID do usuário ---
+      await api.post("/goals", { userId: selectedUser, title, dueDate });
+      
       setTitle("");
-      setSelectedUser(null);
+      setSelectedUser(""); // Limpa para string vazia
       setDueDate(null);
       fetchAllData();
     } catch (error) {
       console.error("Erro ao criar a meta:", error);
       alert("Falha ao criar a meta.");
+    }
+  };
+  const handleDeleteGoal = async (goalIdToDelete) => {
+    // Usar uma confirmação previne exclusões acidentais
+    if (!window.confirm("Tem certeza que deseja excluir esta meta?")) {
+      return;
+    }
+  
+    try {
+      // 1. Chama a API para deletar a meta no servidor
+      await api.delete(`/goals/${goalIdToDelete}`);
+  
+      // 2. Atualiza o estado da UI para remover o card imediatamente
+      setColumns(prevColumns => {
+        const newColumns = {};
+        // Itera sobre cada chave de coluna ('PENDENTE', 'EM_ANDAMENTO', etc.)
+        for (const columnKey in prevColumns) {
+          // Para cada coluna, cria um novo array filtrando para fora a meta que foi excluída
+          newColumns[columnKey] = prevColumns[columnKey].filter(
+            (goal) => goal.id !== goalIdToDelete
+          );
+        }
+        return newColumns;
+      });
+  
+    } catch (error) {
+      console.error("Erro ao excluir a meta:", error);
+      alert("Não foi possível excluir a meta. Tente novamente.");
     }
   };
 
@@ -139,37 +159,56 @@ function TeamGoalsPage() {
       : Object.keys(columns).find((key) =>
           columns[key].some((item) => item.id === id)
         );
+
   const onDragStart = (event) => {
     const allGoals = Object.values(columns).flat();
     setActiveGoal(allGoals.find((g) => g.id === event.active.id));
   };
+  
   const onDragEnd = (event) => {
     const { active, over } = event;
     setActiveGoal(null);
     if (!over) return;
+  
     const activeContainer = findContainer(active.id);
     const overContainer = findContainer(over.id) || over.id;
+  
     if (!activeContainer || !overContainer || activeContainer === overContainer)
       return;
-
+  
     const newStatus = overContainer;
-    api.put(`/goals/${active.id}/status`, { status: newStatus });
+  
     setColumns((prev) => {
-      const activeItems = prev[activeContainer];
-      const overItems = prev[overContainer];
-      const activeIndex = activeItems.findIndex(
-        (item) => item.id === active.id
-      );
+      // Copia os arrays das colunas
+      const activeItems = [...prev[activeContainer]];
+      const overItems = [...prev[overContainer]];
+  
+      const activeIndex = activeItems.findIndex((item) => item.id === active.id);
+      if (activeIndex === -1) return prev;
+  
+      // Remove o item da coluna de origem (sem mutar o array original)
       const [movedItem] = activeItems.splice(activeIndex, 1);
-      movedItem.status = newStatus;
-      overItems.push(movedItem);
+  
+      // Cria uma cópia do item com o novo status
+      const updatedItem = { ...movedItem, status: newStatus };
+  
+      // Adiciona na coluna de destino (sem mutar)
+      const newOverItems = [...overItems, updatedItem];
+  
       return {
         ...prev,
-        [activeContainer]: [...activeItems],
-        [overContainer]: [...overItems],
+        [activeContainer]: activeItems,
+        [overContainer]: newOverItems,
       };
     });
+  
+    // Atualiza no backend
+    api.put(`/goals/${active.id}/status`, { status: newStatus }).catch((err) => {
+      console.error("Falha ao atualizar o status da meta:", err);
+      fetchAllData(); // Reverte se falhar
+    });
   };
+  
 
   const columnTitles = {
     PENDENTE: "📋 A Fazer",
@@ -182,50 +221,44 @@ function TeamGoalsPage() {
   return (
     <div className={styles.container}>
       <h1>Plano de Desenvolvimento da Equipe</h1>
-      {/* Adicionei 'styles.formCard' para o estilo do CSS funcionar neste Card */}
       <Card className={styles.formCard}>
         <form onSubmit={handleCreateGoal} className={styles.formGrid}>
-          <div
-            className={styles.formGroup}
-            style={{ gridColumn: "1 / span 2" }}
-          >
-            <label htmlFor="goalTitle">Nova Meta</label>
-            <input
-              id="goalTitle"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Descreva a meta..."
-            />
-          </div>
-          <div className={styles.formGroup}>
-  <label>Atribuir para</label>
+          <TextField
+            fullWidth
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            label="Escreva sua Meta"
+            variant="outlined"
+          />
+          {/* --- MUDANÇA 3: Renderização correta dos usuários no Select --- */}
+          <FormControl fullWidth>
+            <InputLabel id="user-select-label">Atribuir para</InputLabel>
+            <Select
+              labelId="user-select-label"
+              value={selectedUser}
+              label="Atribuir para"
+              onChange={(e) => setSelectedUser(e.target.value)}
+            >
+              {/* Adicionado o `return` implícito com () e usando `user` no singular */}
+              {users.map(user => (
+                <MenuItem key={user.value} value={user.value}>
+                  {user.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-  {/* Este container será nossa barreira de estilos */}
-  <div className={styles.selectResetContainer}> 
-    <Select 
-      options={users} 
-      value={selectedUser} 
-      onChange={setSelectedUser} 
-      placeholder="Selecione..." 
-      styles={customSelectStyles(theme)} 
-      menuPortalTarget={document.body} 
-    />
-  </div>
-</div>
           <div className={styles.formGroup}>
-            <label>Prazo Final</label>
             <DatePicker
               selected={dueDate}
               onChange={(date) => setDueDate(date)}
               dateFormat="dd/MM/yyyy"
-              locale="pt-BR"
-              placeholderText="Selecione uma data"
+              locale={ptBR}
+              placeholderText="Selecione o prazo"
               className={styles.datePickerInput}
             />
           </div>
           <div className={styles.formGroup}>
-            <label style={{ visibility: "hidden" }}>Ação</label>
             <button type="submit" className={styles.submitButton}>
               + Adicionar
             </button>
@@ -246,6 +279,7 @@ function TeamGoalsPage() {
               id={status}
               title={title}
               goals={columns[status] || []}
+              onDeleteGoal={handleDeleteGoal}
             />
           ))}
         </div>

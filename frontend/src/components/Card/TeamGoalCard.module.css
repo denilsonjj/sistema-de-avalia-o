@@ -29,3 +29,17 @@
   .avatarContainer {
     flex-shrink: 0;
   }
+  /* Adicione isso ao seu arquivo GoalsPage.module.css */
+
+.deleteButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: #888; /* Cor inicial do ícone */
+  transition: color 0.2s ease-in-out;
+}
+
+.deleteButton:hover {
+  color: #e53e3e; /* Cor vermelha ao passar o mouse */
+}

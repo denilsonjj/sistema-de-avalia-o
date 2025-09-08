@@ -1,9 +1,12 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import Avatar from '../Avatar/Avatar'; 
-import styles from '../../pages/GoalsPage/GoalsPage.module.css'
-function TeamGoalCard({ goal }) {
+import Avatar from '../Avatar/Avatar';
+import styles from '../../pages/GoalsPage/GoalsPage.module.css';
+import { FaTrashAlt } from "react-icons/fa";
+
+// 1. Receba a prop 'onDelete' vinda do componente pai
+function TeamGoalCard({ goal, onDelete }) {
   const {
     attributes,
     listeners,
@@ -17,6 +20,14 @@ function TeamGoalCard({ goal }) {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
+  };
+
+  // 2. Crie a função que será chamada no clique do ícone
+  const handleDeleteClick = (e) => {
+    // Impede que o clique acione o evento de arrastar do card
+    e.stopPropagation();
+    // Chama a função do pai, passando o ID da meta a ser excluída
+    onDelete(goal.id);
   };
 
   return (
@@ -33,6 +44,10 @@ function TeamGoalCard({ goal }) {
       </div>
       <div className={styles.avatarContainer}>
         <Avatar name={goal.user.name} />
+        {/* 3. Transforme o ícone em um botão clicável */}
+        <button onClick={handleDeleteClick} className={styles.deleteButton}>
+          <FaTrashAlt />
+        </button>
       </div>
     </div>
   );
