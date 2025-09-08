@@ -4,24 +4,28 @@ import api from '../../services/api';
 import Card from '../../components/Card/Card';
 import CompetencyRadarChart from '../../components/charts/CompetencyRadarChart';
 import styles from './EvaluationDetailPage.module.css';
-import { evaluationCategories } from '../CreateEvaluationPage/evaluationFields';
+import { evaluationFieldsConfig } from '../CreateEvaluationPage/evaluationFields';
+import Button from '@mui/material/Button';
+import { useAuth } from '../../context/AuthContext'; // Usando o hook corrigido
 
 const getFieldLabel = (fieldName) => {
-  for (const category in evaluationCategories) {
-    const field = evaluationCategories[category].find(f => f.name === fieldName);
-    if (field) return field.label;
-  }
-  return fieldName;
+  const fieldConfig = evaluationFieldsConfig.find(
+    config => config.scoreKey === fieldName
+  );
+  return fieldConfig ? fieldConfig.label : fieldName;
 };
 
 function EvaluationDetailPage() {
-  // Agora pegamos tanto userId quanto evaluationId dos parâmetros da URL
   const { userId, evaluationId } = useParams();
   const [user, setUser] = useState(null);
-  const [evaluation, setEvaluation] = useState(null); // Estado para uma única avaliação
+  const [evaluation, setEvaluation] = useState(null);
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showOriginalValues, setShowOriginalValues] = useState(false);
+
+  const { user: loggedInUser } = useAuth();
+  const isManager = loggedInUser && (loggedInUser.role === 'lider' || loggedInUser.role === 'admin'|| loggedInUser=== 'PMM');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,13 +36,11 @@ function EvaluationDetailPage() {
         let targetUserId;
 
         if (evaluationId) {
-          // Cenário 1: Carrega pela ID da avaliação
           const evalRes = await api.get(`/evaluations/${evaluationId}`);
           currentEval = evalRes.data;
           setEvaluation(currentEval);
-          targetUserId = currentEval.userId; // Pega o ID do usuário a partir da avaliação
+          targetUserId = currentEval.userId;
         } else if (userId) {
-          // Cenário 2: Carrega as avaliações do usuário e pega a mais recente
           targetUserId = userId;
           const evalRes = await api.get(`/evaluations/user/${userId}`);
           if (evalRes.data && evalRes.data.length > 0) {
@@ -47,7 +49,6 @@ function EvaluationDetailPage() {
           }
         }
 
-        // Se encontramos um usuário, busca os dados dele e suas metas
         if (targetUserId) {
           const [userRes, goalsRes] = await Promise.all([
             api.get(`/auth/users/${targetUserId}`),
@@ -55,10 +56,9 @@ function EvaluationDetailPage() {
           ]);
           setUser(userRes.data);
           setGoals(goalsRes.data);
-        } else {
-           // Se não há targetUserId (usuário sem avaliação clicado via /equipe/:userId)
-           const userRes = await api.get(`/auth/users/${userId}`);
-           setUser(userRes.data);
+        } else if(userId) {
+            const userRes = await api.get(`/auth/users/${userId}`);
+            setUser(userRes.data);
         }
 
       } catch (err) {
@@ -74,20 +74,33 @@ function EvaluationDetailPage() {
   if (loading) return <p>Carregando relatório...</p>;
   if (error) return <p className={styles.error}>{error}</p>;
 
-  // O ID do usuário para os botões de ação
   const actionUserId = user?.id || userId;
 
   const renderEvaluationDetails = () => {
     if (!evaluation) return null;
     const scoreFields = Object.keys(evaluation).filter(key => key.endsWith('_score'));
+    
     return (
       <div className={styles.detailsGrid}>
-        {scoreFields.map(field => (
-          <div key={field} className={styles.detailItem}>
-            <span className={styles.detailLabel}>{getFieldLabel(field)}</span>
-            <span className={styles.detailValue}>{evaluation[field] !== null ? evaluation[field] : 'N/A'}</span>
-          </div>
-        ))}
+        {scoreFields.map(fieldScoreKey => {
+          const fieldValueKey = fieldScoreKey.replace('_score', '_value');
+          const score = evaluation[fieldScoreKey];
+          const originalValue = evaluation[fieldValueKey];
+
+          return (
+            <div key={fieldScoreKey} className={styles.detailItem}>
+              <span className={styles.detailLabel}>{getFieldLabel(fieldScoreKey)}</span>
+              <div className={styles.valueContainer}>
+                <span className={styles.detailValue}>{score !== null ? score : 'N/A'}</span>
+                {isManager && showOriginalValues && originalValue !== null && originalValue !== undefined && (
+                  <span className={styles.originalValue}>
+                    (Valor: {originalValue})
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -99,14 +112,26 @@ function EvaluationDetailPage() {
           <h1>Relatório de Desempenho</h1>
           <p className={styles.userName}>{user?.name}</p>
         </div>
-        <div className={styles.headerActions}>
-          <Link to={`/equipe/${actionUserId}/nova-avaliacao`} className={`${styles.actionButton} ${styles.primary}`}>
-            + Nova Avaliação
-          </Link>
-          <Link to={`/equipe/${actionUserId}/atribuir-meta`} className={`${styles.actionButton} ${styles.secondary}`}>
-            + Atribuir Meta
-          </Link>
-        </div>
+
+        {/* --- CORREÇÃO APLICADA AQUI --- */}
+        {/* O container dos botões só será renderizado se o usuário for um líder */}
+        {isManager && (
+          <div className={styles.headerActions}>
+            <Button 
+              variant="outlined" 
+              size="small"
+              onClick={() => setShowOriginalValues(!showOriginalValues)}
+            >
+              {showOriginalValues ? 'Ocultar Valores' : 'Ver Valores Originais'}
+            </Button>
+            <Link to={`/equipe/${actionUserId}/nova-avaliacao`} className={`${styles.actionButton} ${styles.primary}`}>
+              + Nova Avaliação
+            </Link>
+            <Link to={`/equipe/${actionUserId}/atribuir-meta`} className={`${styles.actionButton} ${styles.secondary}`}>
+              + Atribuir Meta
+            </Link>
+          </div>
+        )}
       </div>
 
       <div className={styles.grid}>

@@ -95,3 +95,6 @@
 .error {
     color: var(--color-tangerine-dark);
 }
+.evaluationItem > div.evaluationLink {
+  cursor: default;
+}

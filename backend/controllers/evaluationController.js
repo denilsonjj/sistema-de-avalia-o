@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { calculateEvaluationScores } = require('../services/evaluationCalculatorService');
 
-// Objeto com os pesos de cada item da avaliação
 const evaluationWeights = {
   quick_score: 1,
   standard_score: 0.5,
@@ -42,16 +42,20 @@ const calculateFinalScore = (data) => {
 
 exports.createEvaluation = async (req, res) => {
   const { userId } = req.params;
-  const data = req.body;
+  const rawData = req.body; // Dados com os campos _value
 
   try {
-    const finalScore = calculateFinalScore(data);
+    // 1. Usa o serviço para calcular todas as pontuações e a nota final
+    const calculatedData = calculateEvaluationScores(rawData);
+
+    // 2. Combina os dados brutos com os dados calculados
     const evaluationData = {
       userId: userId,
-      ...data,
-      finalScore: finalScore,
+      ...rawData,
+      ...calculatedData,
     };
-
+    
+    // 3. Salva tudo no banco de dados
     const evaluation = await prisma.evaluation.create({
       data: evaluationData,
     });
@@ -63,14 +67,18 @@ exports.createEvaluation = async (req, res) => {
 
 exports.updateEvaluation = async (req, res) => {
   const { id } = req.params;
-  const data = req.body;
+  const rawData = req.body;
   try {
-    const finalScore = calculateFinalScore(data);
-    const evaluationData = {
-      ...data,
-      finalScore: finalScore,
-    };
+    // 1. Recalcula tudo com base nos novos dados
+    const calculatedData = calculateEvaluationScores(rawData);
 
+    // 2. Combina os dados
+    const evaluationData = {
+      ...rawData,
+      ...calculatedData,
+    };
+    
+    // 3. Atualiza no banco
     const updatedEvaluation = await prisma.evaluation.update({
       where: { id: id },
       data: evaluationData,
@@ -90,7 +98,7 @@ exports.getEvaluationsByUser = async (req, res) => {
     });
     res.status(200).json(evaluations);
   } catch (error) {
-    res.status(500).json({ message: 'Erro ao buscar avaliações.' });
+    res.status(500).json({ message: 'Erro ao buscar avaliações.', error: error.message });
   }
 };
 

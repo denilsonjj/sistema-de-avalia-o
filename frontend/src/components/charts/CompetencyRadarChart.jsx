@@ -1,67 +1,62 @@
 import React from 'react';
+// Importamos tudo que precisamos, incluindo o Tooltip
 import { Radar, RadarChart, PolarGrid, Legend, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
-import { evaluationCategories } from '../../pages/CreateEvaluationPage/evaluationFields';
+import { evaluationFieldsConfig } from '../../pages/CreateEvaluationPage/evaluationFields.js';
 
-const getFieldLabel = (fieldName) => {
-  for (const category of Object.values(evaluationCategories)) {
-    const field = category.find(f => f.name === fieldName);
-    if (field) {
-    
-      return field.label.split('(')[0].trim();
+const CompetencyRadarChart = ({ evaluationData }) => {
+    if (!evaluationData) {
+        return <p>Dados insuficientes para gerar o gráfico.</p>;
     }
-  }
-  return fieldName;
+
+    // 1. Agrupa os campos por sua categoria
+    const fieldsByCategory = evaluationFieldsConfig.reduce((acc, field) => {
+        // Consideramos apenas os campos que são métricas (não subjetivos)
+        if (field.scoreKey && field.inputType === 'value') {
+            const category = field.category;
+            if (!acc[category]) {
+                acc[category] = [];
+            }
+            acc[category].push(field.scoreKey);
+        }
+        return acc;
+    }, {});
+
+    // 2. Calcula a média das notas para cada categoria
+    const data = Object.keys(fieldsByCategory).map(category => {
+        const scoreKeys = fieldsByCategory[category];
+        let totalScore = 0;
+        let validItemsCount = 0;
+
+        scoreKeys.forEach(key => {
+            const score = evaluationData[key];
+            if (score !== null && score !== undefined) {
+                totalScore += score;
+                validItemsCount++;
+            }
+        });
+
+        const averageScore = validItemsCount > 0 ? (totalScore / validItemsCount) : 0;
+
+        return {
+            subject: category, // O "assunto" agora é a CATEGORIA
+            A: parseFloat(averageScore.toFixed(2)), // A pontuação é a MÉDIA
+            fullMark: 5,
+        };
+    });
+
+    return (
+        <ResponsiveContainer width="100%" height={350}>
+            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+                <PolarGrid />
+                <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12 }} />
+                <PolarRadiusAxis angle={30} domain={[0, 5]} />
+                <Radar name="Média da Categoria" dataKey="A" stroke="#243782" fill="#243782" fillOpacity={0.6} />
+                <Legend />
+                {/* O Tooltip está aqui, como deveria estar */}
+                <Tooltip />
+            </RadarChart>
+        </ResponsiveContainer>
+    );
 };
-
-
-const RADAR_CHART_FIELDS = [
-  'avaliacaoTecnica_score',
-  'avaliacaoComportamental_score',
-  'qualidadeExecucaoEWO_score',
-  'sugestoesSeguranca_score',
-  'quick_score',
-  'saturacaoTrabalho_score',
-];
-
-function CompetencyRadarChart({ evaluationData }) {
-  const chartData = RADAR_CHART_FIELDS.map(fieldName => ({
-    subject: getFieldLabel(fieldName),
-    score: evaluationData[fieldName] || 0, 
-    fullMark: 5,
-  }));
-
-  return (
-    <ResponsiveContainer width="100%" height={350}>
-      <RadarChart cx="70%" cy="50%" outerRadius="75%" data={chartData}>
-        <PolarGrid stroke="var(--color-border)" />
-        <PolarAngleAxis 
-          dataKey="subject" 
-          tick={{ fill: 'var(--color-text)', fontSize: 12 }} 
-        />
-        <PolarRadiusAxis 
-          angle={10} 
-          domain={[0, 5]} 
-          tick={false} 
-          axisLine={false} 
-        />
-        <Radar 
-          name="Pontuação" 
-          dataKey="score" 
-          stroke="var(--color-primary)" 
-          fill="var(--color-primary)" 
-          fillOpacity={0.6} 
-        />
-        <Legend wrapperStyle={{ paddingTop: '10px' }} />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: 'var(--color-surface)',
-            borderColor: 'var(--color-border)',
-            borderRadius: '8px',
-          }}
-        />
-      </RadarChart>
-    </ResponsiveContainer>
-  );
-}
 
 export default CompetencyRadarChart;

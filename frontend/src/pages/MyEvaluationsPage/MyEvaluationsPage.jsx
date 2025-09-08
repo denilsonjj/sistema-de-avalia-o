@@ -71,9 +71,13 @@ const MyEvaluationsPage = () => {
       <h1>{pageTitle}</h1>
       {evaluations.length > 0 ? (
         <ul className={styles.evaluationList}>
-          {evaluations.map((evaluation) => (
-            <li key={evaluation.id} className={styles.evaluationItem}>
-               <Link to={`/evaluations/${evaluation.id}`} className={styles.evaluationLink}>
+          {evaluations.map((evaluation) => {
+            // Verifica se o usuário logado é um gerente/líder
+            const isManager = loggedInUser?.role === 'lider' || loggedInUser?.role === 'admin';
+
+            // Conteúdo interno do item da lista (para não repetir o código)
+            const itemContent = (
+              <>
                 <div className={styles.evaluationInfo}>
                   <span className={styles.date}>
                     {new Date(evaluation.createdAt).toLocaleDateString()}
@@ -88,9 +92,25 @@ const MyEvaluationsPage = () => {
                     {evaluation.finalScore?.toFixed(2) ?? 'N/A'}
                   </span>
                 </div>
-              </Link>
-            </li>
-          ))}
+              </>
+            );
+
+            return (
+              <li key={evaluation.id} className={styles.evaluationItem}>
+                {isManager ? (
+                  // Se for LÍDER, renderiza o Link clicável
+                  <Link to={`/evaluations/${evaluation.id}`} className={styles.evaluationLink}>
+                    {itemContent}
+                  </Link>
+                ) : (
+                  // Se for TÉCNICO, renderiza uma div NÃO clicável
+                  <div className={styles.evaluationLink}> {/* Usamos a mesma classe para o estilo */}
+                    {itemContent}
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       ) : (
         <p>Nenhuma avaliação registrada para este usuário.</p>
@@ -98,5 +118,4 @@ const MyEvaluationsPage = () => {
     </div>
   );
 };
-
-export default MyEvaluationsPage;
+ export default MyEvaluationsPage;

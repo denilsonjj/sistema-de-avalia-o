@@ -76,9 +76,11 @@
 }
 
 /* --- Layout do Grid Principal --- */
+/* Em EvaluationDetailPage.module.css */
 .grid {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  /* CORREÇÃO: Colunas proporcionais. A primeira ocupa 1 parte e a segunda 2 partes do espaço. */
+  grid-template-columns: 1fr 2fr; 
   gap: 1.2rem;
   align-items: start;
 }
@@ -305,4 +307,67 @@ body[data-theme='dark'] .goalItem:hover {
   .detailsGrid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ... (Mantenha o CSS que você já tem e adicione o seguinte no final) ... */
+
+.scoreItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.scoreInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.scoreItem strong {
+  align-self: flex-end;
+  color: var(--color-primary);
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.detailsButton {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 0;
+}
+
+.valueDetail {
+  background-color: var(--color-background-light);
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  width: 100%;
+  text-align: right;
+  border: 1px solid var(--color-border);
+}
+/* Adicionar ao arquivo EvaluationDetailPage.module.css */
+
+.valueContainer {
+  display: flex;
+  align-items: baseline;
+}
+
+.originalValue {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-left: 8px;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }

@@ -66,45 +66,65 @@ model Evaluation {
   user   User   @relation(fields: [userId], references: [id])
   userId String
 
-  // --- CAMPOS DA NOVA AVALIAÇÃO BASEADA NA PLANILHA ---
+  // --- CAMPOS DA NOVA AVALIAÇÃO (VALOR BRUTO + PONTUAÇÃO CALCULADA) ---
 
   // PROJETOS
-  quick_score                    Int?
+  quick_value                    Int? // Valor inserido pelo líder
+  quick_score                    Int? // Nota 1-5 calculada
+  standard_value                 Int?
   standard_score                 Int?
 
   // Notas
+  qtdGeralManutencao_value       Int?
   qtdGeralManutencao_score       Int?
 
   // QUEBRA DE MÁQUINA
+  quebraMaior30minTurno_value    Int?
   quebraMaior30minTurno_score    Int?
+  mttrTurno_value                Float? // Usando Float para minutos
   mttrTurno_score                Int?
 
   // ANÁLISE DE QUEBRA
+  qualidadeExecucaoEWO_value     Float? // Usando Float para percentual
   qualidadeExecucaoEWO_score     Int?
+  tempoAberturaEWO_value         Int?
   tempoAberturaEWO_score         Int?
 
   // EFICIÊNCIA MONTAGEM
+  opeGeral_value                 Float?
   opeGeral_score                 Int?
+  nonOpeBreak_value              Float?
   nonOpeBreak_score              Int?
 
   // ASSIDUIDADE
+  absenteismo_value              Int?
   absenteismo_score              Int?
+  saturacaoTrabalho_value        Float?
   saturacaoTrabalho_score        Int?
 
   // SEGURANÇA
+  sugestoesSeguranca_value       Int?
   sugestoesSeguranca_score       Int?
+  cartoesRecebidos_value         Int?
   cartoesRecebidos_score         Int?
+  zeroAcidenteTurno_value        Int?
   zeroAcidenteTurno_score        Int?
+  condicoesAbertasArea_value     Int?
   condicoesAbertasArea_score     Int?
 
   // ENTREGA
+  atendimentoUTE_value           Int?
   atendimentoUTE_score           Int?
+  avaliacaoTecnica_value         Int? // Este pode ser direto 1-5
   avaliacaoTecnica_score         Int?
+  backlogManutencao_value        Int?
   backlogManutencao_score        Int?
+  avaliacaoComportamental_value  Int? // Este pode ser direto 1-5
   avaliacaoComportamental_score  Int?
+  qualidadeLancamentosSAP_value  Float?
   qualidadeLancamentosSAP_score  Int?
   
-  // NOTA FINAL
+  // NOTA FINAL PONDERADA
   finalScore                     Float?
 }
 

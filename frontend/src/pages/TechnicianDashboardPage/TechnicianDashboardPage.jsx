@@ -12,8 +12,8 @@ function TechnicianDashboardPage() {
   const [latestEvaluation, setLatestEvaluation] = useState(null);
   const [goals, setGoals] = useState([]);
   const [oeeData, setOeeData] = useState(null); 
-  const [loading, setLoading] = useState(true);
   const [lines, setLines] = useState([]); 
+  const [loading, setLoading] = useState(true);
   const firstName = user?.name ? user.name.split(' ')[0] : 'Usuário';
 
   useEffect(() => {
@@ -21,25 +21,31 @@ function TechnicianDashboardPage() {
 
     const fetchData = async () => {
       try {
-        const [evalRes, goalsRes, oeeRes] = await Promise.all([
-          api.get(`/evaluations/user/${user.userId}`),
-          api.get(`/goals/user/${user.userId}`),
-          api.get(`/oee/user/${user.userId}`) ,
-          api.get(`/oee/lines/overview`)
+        // CORREÇÃO 1: Usar user.id em vez de user.userId
+        const userId = user.id;
+        
+        // CORREÇÃO 2: Capturar a resposta da 4ª chamada de API
+        const [evalRes, goalsRes, oeeRes, linesOverviewRes] = await Promise.all([
+          api.get(`/evaluations/user/${userId}`),
+          api.get(`/goals/user/${userId}`),
+          api.get(`/oee/user/${userId}`),
+          api.get(`/oee/lines/overview`) // Agora capturamos esta resposta
         ]);
 
         if (evalRes.data && evalRes.data.length > 0) {
           setLatestEvaluation(evalRes.data[0]);
         }
         setGoals(goalsRes.data);
-
-       
+        
         if (oeeRes.data && oeeRes.data.length > 0) {
             const avgAvailability = oeeRes.data.reduce((sum, item) => sum + item.availability, 0) / oeeRes.data.length;
             const avgPerformance = oeeRes.data.reduce((sum, item) => sum + item.performance, 0) / oeeRes.data.length;
             const avgQuality = oeeRes.data.reduce((sum, item) => sum + item.quality, 0) / oeeRes.data.length;
             const overallOee = (avgAvailability / 100) * (avgPerformance / 100) * (avgQuality / 100);
-            const lineNAmes = oeeRes.data.map(lines => lines.lineName).join(', ');
+            
+            // CORREÇÃO 3: Corrigido o nome da variável de 'lineNAmes' para 'lineNames'
+            const lineNames = oeeRes.data.map(line => line.lineName).join(', ');
+            
             setOeeData({
                 availability: avgAvailability,
                 performance: avgPerformance,
@@ -47,9 +53,11 @@ function TechnicianDashboardPage() {
                 oee: overallOee * 100
             });
 
-            setLines(lineNAmes);
-            console.log(lineNAmes);
+            setLines(lineNames); // Agora 'lines' terá os nomes das linhas do usuário
         }
+        
+        // Exemplo de como você poderia usar os dados de 'linesOverviewRes'
+        // console.log('Visão geral de todas as linhas:', linesOverviewRes.data);
 
       } catch (error) {
         console.error("Erro ao buscar dados do dashboard:", error);
@@ -74,15 +82,14 @@ function TechnicianDashboardPage() {
       
   
       {oeeData && (
-        <div className={styles.kpiGrid}>
-            <Card>
-                 <div className={styles.kpiCard} style={{borderColor: 'var(--color-orange)'}}>
-                    <div className={styles.kpiValue}>{oeeData.performance.toFixed(1)}%</div>
-                    <div className={styles.kpiLabel}>Performance média das linhas</div>
-                </div>
-            </Card>
-        </div>
-      )}
+  <div className={styles.kpiGrid}>
+      
+      <div className={styles.kpiCardWrapper}>
+        <div className={styles.kpiValue}>{oeeData.performance.toFixed(1)}%</div>
+        <div className={styles.kpiLabel}>Performance média da sua linha de produção</div>
+      </div>
+  </div>
+)}
 
       <div className={styles.mainGrid}>
         <div className={styles.mainCard}>
@@ -94,8 +101,8 @@ function TechnicianDashboardPage() {
             ) : (
               <p>Você ainda não possui avaliações registradas.</p>
             )}
-             <Link to="/avaliacoes" className={styles.detailsLink}>
-                Ver histórico de avaliações
+             <Link to="/minhas-avaliacoes" className={styles.detailsLink}> {/* Link corrigido para uma rota de usuário */}
+                Ver meu histórico
              </Link>
           </Card>
         </div>
@@ -105,7 +112,8 @@ function TechnicianDashboardPage() {
             {inProgressGoals.length > 0 ? (
               <div className={styles.goalsList}>
                 {inProgressGoals.map(goal => (
-                  <div key={goal.id} classsName={styles.goalItem}>
+                  // CORREÇÃO 4: 'classsName' corrigido para 'className'
+                  <div key={goal.id} className={styles.goalItem}>
                     <FaBullseye /> <span>{goal.title}</span>
                   </div>
                 ))}

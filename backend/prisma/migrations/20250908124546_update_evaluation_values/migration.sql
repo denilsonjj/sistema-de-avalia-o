@@ -1,0 +1,21 @@
+-- AlterTable
+ALTER TABLE "Evaluation" ADD COLUMN "absenteismo_value" INTEGER;
+ALTER TABLE "Evaluation" ADD COLUMN "atendimentoUTE_value" INTEGER;
+ALTER TABLE "Evaluation" ADD COLUMN "avaliacaoComportamental_value" INTEGER;
+ALTER TABLE "Evaluation" ADD COLUMN "avaliacaoTecnica_value" INTEGER;
+ALTER TABLE "Evaluation" ADD COLUMN "backlogManutencao_value" INTEGER;
+ALTER TABLE "Evaluation" ADD COLUMN "cartoesRecebidos_value" INTEGER;
+ALTER TABLE "Evaluation" ADD COLUMN "condicoesAbertasArea_value" INTEGER;
+ALTER TABLE "Evaluation" ADD COLUMN "mttrTurno_value" REAL;
+ALTER TABLE "Evaluation" ADD COLUMN "nonOpeBreak_value" REAL;
+ALTER TABLE "Evaluation" ADD COLUMN "opeGeral_value" REAL;
+ALTER TABLE "Evaluation" ADD COLUMN "qtdGeralManutencao_value" INTEGER;
+ALTER TABLE "Evaluation" ADD COLUMN "qualidadeExecucaoEWO_value" REAL;
+ALTER TABLE "Evaluation" ADD COLUMN "qualidadeLancamentosSAP_value" REAL;
+ALTER TABLE "Evaluation" ADD COLUMN "quebraMaior30minTurno_value" INTEGER;
+ALTER TABLE "Evaluation" ADD COLUMN "quick_value" INTEGER;
+ALTER TABLE "Evaluation" ADD COLUMN "saturacaoTrabalho_value" REAL;
+ALTER TABLE "Evaluation" ADD COLUMN "standard_value" INTEGER;
+ALTER TABLE "Evaluation" ADD COLUMN "sugestoesSeguranca_value" INTEGER;
+ALTER TABLE "Evaluation" ADD COLUMN "tempoAberturaEWO_value" INTEGER;
+ALTER TABLE "Evaluation" ADD COLUMN "zeroAcidenteTurno_value" INTEGER;

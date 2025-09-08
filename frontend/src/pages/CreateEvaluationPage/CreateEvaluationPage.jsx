@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import styles from './CreateEvaluationPage.module.css';
-import { evaluationCategories } from './evaluationFields';
+import { evaluationFieldsConfig } from './evaluationFields';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
@@ -12,6 +12,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
+import TextField from '@mui/material/TextField'; 
 
 const CreateEvaluationPage = () => {
   const { userId } = useParams();
@@ -35,9 +36,10 @@ const CreateEvaluationPage = () => {
     }
   }, [userId]);
 
-  const handleSelectChange = (name, value) => {
-    const score = value !== '' && value !== null ? Number(value) : null;
-    setEvaluationData(prev => ({ ...prev, [name]: score }));
+  // RENOMEADO para um nome mais genérico, pois lida com ambos os tipos de input
+  const handleValueChange = (fieldName, value) => {
+    const fieldValue = value === '' ? null : Number(value);
+    setEvaluationData(prev => ({ ...prev, [fieldName]: fieldValue }));
   };
 
   const handleSubmit = async (e) => {
@@ -54,7 +56,6 @@ const CreateEvaluationPage = () => {
 
     try {
       await api.post(`/evaluations/user/${userId}`, dataToSend);
-      // feedback simples e redireciona
       navigate(`/equipe/${userId}`);
     } catch (err) {
       setError('Erro ao criar avaliação. ' + (err.response?.data?.message || err.message));
@@ -63,7 +64,14 @@ const CreateEvaluationPage = () => {
     }
   };
 
-  const scoreOptions = [1, 2, 3, 4, 5];
+  const fieldsByCategory = evaluationFieldsConfig.reduce((acc, field) => {
+    const { category } = field;
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(field);
+    return acc;
+  }, {});
 
   return (
     <div className={styles.container}>
@@ -74,30 +82,52 @@ const CreateEvaluationPage = () => {
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       <form onSubmit={handleSubmit} className={styles.form}>
-        {Object.entries(evaluationCategories).map(([category, fields]) => (
+        {Object.entries(fieldsByCategory).map(([category, fields]) => (
           <fieldset key={category} className={styles.fieldset}>
             <legend className={styles.legend}>{category}</legend>
             <Box className={styles.fieldsGrid} sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 2 }}>
-              {fields.map(field => (
-                <FormControl key={field.name} fullWidth size="small" variant="outlined" sx={{ mb: 0 }}>
-                  <InputLabel id={`label-${field.name}`}>{field.label}</InputLabel>
-                  <Select
-                    labelId={`label-${field.name}`}
-                    id={field.name}
-                    value={evaluationData[field.name] ?? ''}
-                    label={field.label}
-                    onChange={(e) => handleSelectChange(field.name, e.target.value)}
-                    renderValue={(v) => (v === '' ? 'Selecione a pontuação' : v)}
-                  >
-                    <MenuItem value="">
-                      <em>Selecione a pontuação</em>
-                    </MenuItem>
-                    {scoreOptions.map((s) => (
-                      <MenuItem key={s} value={s}>{s}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              ))}
+              {fields.map(field => {
+                const fieldName = field.valueKey;
+
+                // --- LÓGICA CONDICIONAL PARA ESCOLHER O TIPO DE CAMPO ---
+                // Se o input for de nota direta (1 a 5)
+                if (field.inputType === 'direct_score') {
+                  return (
+                    // CAMPO DE SELEÇÃO para notas
+                    <FormControl key={fieldName} fullWidth size="small" variant="outlined">
+                      <InputLabel id={`label-${fieldName}`}>{field.label}</InputLabel>
+                      <Select
+                        labelId={`label-${fieldName}`}
+                        id={fieldName}
+                        value={evaluationData[fieldName] ?? ''}
+                        label={field.label}
+                        onChange={(e) => handleValueChange(fieldName, e.target.value)}
+                      >
+                        <MenuItem value=""><em>Selecione a nota</em></MenuItem>
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <MenuItem key={s} value={s}>{s}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  );
+                } else {
+                  // Se o input for de valor numérico
+                  return (
+                    // CAMPO DE NÚMERO para valores de métricas
+                    <TextField
+                      key={fieldName}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      type="number"
+                      label={`${field.label} (${field.unit})`} // Mostra a unidade (ex: min, qtd)
+                      id={fieldName}
+                      value={evaluationData[fieldName] ?? ''}
+                      onChange={(e) => handleValueChange(fieldName, e.target.value)}
+                    />
+                  );
+                }
+              })}
             </Box>
           </fieldset>
         ))}
