@@ -19,6 +19,7 @@ import withReactContent from "sweetalert2-react-content";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
+import { FaPlus } from "react-icons/fa";
 
 const MySwal = withReactContent(Swal);
 
@@ -119,7 +120,7 @@ function GoalsPage() {
 
       let data = [];
 
-      // PMM tem acesso a /goals (busca centralizada). Outros usam rotas específicas para evitar 403.
+     
       if (user?.role === "PMM") {
         data = (await fetchAndReturnData("/goals")) || [];
       } else {
@@ -131,7 +132,7 @@ function GoalsPage() {
           if (byAuthor && byAuthor.length) {
             data = byAuthor;
           } else {
-            // não chamar /goals para evitar 403 se usuário não for PMM
+         
             data = [];
           }
         }
@@ -157,7 +158,6 @@ function GoalsPage() {
 
   useEffect(() => {
     if (user) fetchGoals();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const handleCreateGoal = async (e) => {
@@ -250,7 +250,7 @@ function GoalsPage() {
 
   return (
     <div>
-      <h1 className="titlePage">Plano de Desenvolvimento</h1>
+      <h1 className="titlePage">Minhas Metas</h1>
 
       <div className={styles.formCard}>
         <form onSubmit={handleCreateGoal}>
@@ -265,9 +265,20 @@ function GoalsPage() {
               fullWidth
               inputProps={{ maxLength: 250 }}
             />
-            <Button type="submit" variant="contained" color="primary" disabled={submitting}>
-              {submitting ? "Salvando..." : "+ Adicionar Meta"}
-            </Button>
+           <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={submitting}
+            startIcon={<FaPlus/>} 
+            sx={{ 
+                height: '40px', 
+                whiteSpace: 'nowrap', 
+                minWidth: '150px' 
+            }} 
+          >
+            {submitting ? "Salvando..." : "Adicionar Meta"} {/* Texto mais limpo */}
+          </Button>
           </Box>
         </form>
       </div>

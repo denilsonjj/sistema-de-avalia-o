@@ -130,8 +130,6 @@ function FeedbackBoardPage() {
                 <div key={fb.id} className={styles.feedbackCard}>
                   <div className={styles.feedbackHeader}>
                     <FaQuoteLeft />
-                    
-                    {/* 4. Botão que ACIONA a função de deletar (sempre visível) */}
                     <button 
                       onClick={() => handleDeleteFeedback(fb.id)} 
                       className={styles.deleteButton}
