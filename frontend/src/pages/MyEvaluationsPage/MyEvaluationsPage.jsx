@@ -73,7 +73,7 @@ const MyEvaluationsPage = () => {
         <ul className={styles.evaluationList}>
           {evaluations.map((evaluation) => {
             // Verifica se o usuário logado é um gerente/líder
-            const isManager = loggedInUser?.role === 'lider' || loggedInUser?.role === 'admin';
+            const isManager = loggedInUser?.role === 'LIDER' || loggedInUser?.role === 'PMM' || loggedInUser?.role === 'PMS';
 
             // Conteúdo interno do item da lista (para não repetir o código)
             const itemContent = (
@@ -103,8 +103,7 @@ const MyEvaluationsPage = () => {
                     {itemContent}
                   </Link>
                 ) : (
-                  // Se for TÉCNICO, renderiza uma div NÃO clicável
-                  <div className={styles.evaluationLink}> {/* Usamos a mesma classe para o estilo */}
+                  <div className={styles.evaluationLink}> 
                     {itemContent}
                   </div>
                 )}
