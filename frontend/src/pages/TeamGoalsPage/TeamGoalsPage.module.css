@@ -119,60 +119,8 @@
 
 .cardList {
   min-height: 200px;
-  display: flex;
+   display: flex;
   flex-direction: column;
   gap: 1rem;
   flex-grow: 1;
-}
-
-.goalCard {
-  background: var(--color-surface);
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  cursor: grab;
-  border: 1px solid var(--color-border);
-  display:flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.goalCard:active {
-  cursor: grabbing;
-}
-
-.goalCard p {
-  font-weight: 600;
-  margin: 0 0 0.8rem 0;
-  overflow-wrap: break-word;
-}
-
-.goalCard small {
-  color: #888;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.GoalContent {
-  display: flex;
-  flex-direction: column;
-}
-
-.deleteButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  background-color: #c74338; /* Cor de exemplo */
-  color: white;
-  text-decoration: none;
-}
-
-.deleteButton:hover {
-  background-color: #a11206;
 }

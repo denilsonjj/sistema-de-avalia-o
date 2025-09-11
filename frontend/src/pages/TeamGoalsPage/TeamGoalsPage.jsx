@@ -137,7 +137,6 @@ function TeamGoalsPage() {
       // 2. Atualiza o estado da UI para remover o card imediatamente
       setColumns(prevColumns => {
         const newColumns = {};
-        // Itera sobre cada chave de coluna ('PENDENTE', 'EM_ANDAMENTO', etc.)
         for (const columnKey in prevColumns) {
           // Para cada coluna, cria um novo array filtrando para fora a meta que foi excluída
           newColumns[columnKey] = prevColumns[columnKey].filter(
@@ -202,7 +201,7 @@ function TeamGoalsPage() {
       };
     });
   
-    // Atualiza no backend
+
     api.put(`/goals/${active.id}/status`, { status: newStatus }).catch((err) => {
       console.error("Falha ao atualizar o status da meta:", err);
       fetchAllData(); // Reverte se falhar
@@ -230,7 +229,6 @@ function TeamGoalsPage() {
             label="Escreva sua Meta"
             variant="outlined"
           />
-          {/* --- MUDANÇA 3: Renderização correta dos usuários no Select --- */}
           <FormControl fullWidth>
             <InputLabel id="user-select-label">Atribuir para</InputLabel>
             <Select
@@ -239,7 +237,6 @@ function TeamGoalsPage() {
               label="Atribuir para"
               onChange={(e) => setSelectedUser(e.target.value)}
             >
-              {/* Adicionado o `return` implícito com () e usando `user` no singular */}
               {users.map(user => (
                 <MenuItem key={user.value} value={user.value}>
                   {user.label}

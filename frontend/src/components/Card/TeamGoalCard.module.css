@@ -1,45 +1,80 @@
+/* TeamGoalCard.module.css */
+
 .goalCard {
-    background: var(--color-surface);
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    cursor: grab;
-    border: 1px solid var(--color-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-  }
-  
-  .goalContent {
-    overflow-wrap: break-word;
-    flex-grow: 1;
-  }
-  
-  .goalContent p {
-    font-weight: 600;
-    margin: 0 0 0.5rem 0;
-  }
-  
-  .goalContent small {
-    color: #888;
-    font-size: 0.8rem;
-  }
-  
-  .avatarContainer {
-    flex-shrink: 0;
-  }
-  /* Adicione isso ao seu arquivo GoalsPage.module.css */
+  background: var(--color-surface);
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  cursor: grab;
+  border: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.goalCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.dragging {
+  opacity: 0.8;
+  transform: scale(1.02) translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.goalContent {
+  flex-grow: 1;
+  word-wrap: break-word;
+  max-width: calc(100% - 70px); /* Ajuste para não deixar o texto encostar no avatar */
+}
+
+.goalContent p {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text);
+  margin: 0 0 0.25rem 0;
+  line-height: 1.4;
+}
+
+.goalContent small {
+  color: var(--color-text-secondary, #888); /* Usa a variável, com um fallback */
+  font-size: 0.85rem;
+}
+
+.actionsAndAvatarContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
 
 .deleteButton {
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 5px;
-  color: #888; /* Cor inicial do ícone */
-  transition: color 0.2s ease-in-out;
+  padding: 6px;
+  color: #a0aec0; /* Cor neutra que funciona em ambos os temas */
+  font-size: 1.1rem;
+  transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .deleteButton:hover {
-  color: #e53e3e; /* Cor vermelha ao passar o mouse */
+  color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.1); /* Fundo vermelho transparente */
+  transform: scale(1.1);
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-background); /* Borda para destacar do fundo */
 }

@@ -1,11 +1,10 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import Avatar from '../Avatar/Avatar';
-import styles from '../../pages/GoalsPage/GoalsPage.module.css';
+import Avatar from '../Avatar/Avatar'; // Certifique-se que o caminho está correto
+import styles from './TeamGoalCard.module.css'; // Supondo que o CSS esteja neste arquivo
 import { FaTrashAlt } from "react-icons/fa";
 
-// 1. Receba a prop 'onDelete' vinda do componente pai
 function TeamGoalCard({ goal, onDelete }) {
   const {
     attributes,
@@ -19,16 +18,15 @@ function TeamGoalCard({ goal, onDelete }) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
   };
 
-  // 2. Crie a função que será chamada no clique do ícone
   const handleDeleteClick = (e) => {
-    // Impede que o clique acione o evento de arrastar do card
     e.stopPropagation();
-    // Chama a função do pai, passando o ID da meta a ser excluída
     onDelete(goal.id);
   };
+
+  // Combina a classe base com a classe de 'arrasto' quando ativa
+  const cardClassName = `${styles.goalCard} ${isDragging ? styles.dragging : ''}`;
 
   return (
     <div
@@ -36,16 +34,19 @@ function TeamGoalCard({ goal, onDelete }) {
       style={style}
       {...attributes}
       {...listeners}
-      className={styles.goalCard}
+      className={cardClassName}
     >
+      {/* Bloco de conteúdo principal (título e autor) */}
       <div className={styles.goalContent}>
         <p>{goal.title}</p>
-        <small>Criado por: {goal.author.name}</small>
+        <small>{goal.author.name}</small>
       </div>
-      <div className={styles.avatarContainer}>
-        <Avatar name={goal.user.name} />
-        {/* 3. Transforme o ícone em um botão clicável */}
-        <button onClick={handleDeleteClick} className={styles.deleteButton}>
+      
+      {/* Bloco para agrupar o avatar e as ações */}
+      <div className={styles.actionsAndAvatarContainer}>
+        <Avatar  name={goal.user.name} src={goal.author.avatarUrl} alt={goal.author.name} className={styles.avatar} />
+        
+        <button onClick={handleDeleteClick} className={styles.deleteButton} aria-label="Deletar tarefa">
           <FaTrashAlt />
         </button>
       </div>
