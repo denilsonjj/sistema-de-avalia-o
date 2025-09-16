@@ -18,7 +18,7 @@ import TeamGoalCard from "../../components/Card/TeamGoalCard";
 import Card from "../../components/Card/Card";
 import { useTheme } from "../../context/ThemeContext";
 import TextField from "@mui/material/TextField";
-import { FormControl, Select, InputLabel, MenuItem } from "@mui/material";
+import { FormControl, Select, InputLabel, MenuItem, Box } from "@mui/material";
 
 //         Receba a prop aqui V
 function Column({ id, title, goals, onDeleteGoal }) { 
@@ -69,26 +69,18 @@ function TeamGoalsPage() {
       ]);
   
       const allGoals = goalsRes.data;
-  
-      // ====================================================================
-      // SOLUÇÃO: Limpa os dados, garantindo que cada ID seja único
-      // Isso preserva a regra de negócio (mostrar todas as metas),
-      // mas corrige o bug do drag-and-drop.
       const uniqueGoals = Array.from(new Map(allGoals.map(goal => [goal.id, goal])).values());
   
       if (allGoals.length !== uniqueGoals.length) {
           console.warn("AVISO: Foram removidas metas com IDs duplicados que vieram da API /goals.");
       }
-      // ====================================================================
-  
-      // Agora, use a lista limpa ('uniqueGoals') para popular as colunas
+
       setColumns({
         PENDENTE: uniqueGoals.filter((g) => g.status === "PENDENTE"),
         EM_ANDAMENTO: uniqueGoals.filter((g) => g.status === "EM_ANDAMENTO"),
         CONCLUIDA: uniqueGoals.filter((g) => g.status === "CONCLUIDA"),
       });
   
-      // O resto da sua função continua igual...
       const userOptions = usersRes.data.map((user) => ({
         value: user.id,
         label: user.name,
@@ -112,11 +104,10 @@ function TeamGoalsPage() {
       return;
     }
     try {
-      // --- MUDANÇA 2: Correção no envio do ID do usuário ---
       await api.post("/goals", { userId: selectedUser, title, dueDate });
       
       setTitle("");
-      setSelectedUser(""); // Limpa para string vazia
+      setSelectedUser(""); 
       setDueDate(null);
       fetchAllData();
     } catch (error) {
@@ -125,20 +116,20 @@ function TeamGoalsPage() {
     }
   };
   const handleDeleteGoal = async (goalIdToDelete) => {
-    // Usar uma confirmação previne exclusões acidentais
+    
     if (!window.confirm("Tem certeza que deseja excluir esta meta?")) {
       return;
     }
   
     try {
-      // 1. Chama a API para deletar a meta no servidor
+   
       await api.delete(`/goals/${goalIdToDelete}`);
   
-      // 2. Atualiza o estado da UI para remover o card imediatamente
+    
       setColumns(prevColumns => {
         const newColumns = {};
         for (const columnKey in prevColumns) {
-          // Para cada coluna, cria um novo array filtrando para fora a meta que foi excluída
+        
           newColumns[columnKey] = prevColumns[columnKey].filter(
             (goal) => goal.id !== goalIdToDelete
           );
@@ -178,20 +169,20 @@ function TeamGoalsPage() {
     const newStatus = overContainer;
   
     setColumns((prev) => {
-      // Copia os arrays das colunas
+      
       const activeItems = [...prev[activeContainer]];
       const overItems = [...prev[overContainer]];
   
       const activeIndex = activeItems.findIndex((item) => item.id === active.id);
       if (activeIndex === -1) return prev;
   
-      // Remove o item da coluna de origem (sem mutar o array original)
+ 
       const [movedItem] = activeItems.splice(activeIndex, 1);
   
-      // Cria uma cópia do item com o novo status
+    
       const updatedItem = { ...movedItem, status: newStatus };
   
-      // Adiciona na coluna de destino (sem mutar)
+    
       const newOverItems = [...overItems, updatedItem];
   
       return {
@@ -262,7 +253,7 @@ function TeamGoalsPage() {
           </div>
         </form>
       </Card>
-
+     
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -284,6 +275,7 @@ function TeamGoalsPage() {
           {activeGoal ? <TeamGoalCard goal={activeGoal} /> : null}
         </DragOverlay>
       </DndContext>
+
     </div>
   );
 }

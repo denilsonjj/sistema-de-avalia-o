@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
 import Card from "../../components/Card/Card";
-import Avatar from "../../components/Avatar/Avatar"; 
+import Avatar from "../../components/Avatar/Avatar";
 import styles from "./UserManagementPage.module.css";
-import { FaUser, FaEnvelope, FaLock, FaIdBadge, FaCogs, FaTrashAlt } from 'react-icons/fa'; 
+import { FaUser, FaEnvelope, FaLock, FaIdBadge, FaCogs, FaTrashAlt } from 'react-icons/fa';
 
 function UserManagementPage() {
   const [users, setUsers] = useState([]);
@@ -50,7 +50,7 @@ function UserManagementPage() {
     try {
       await api.post("/auth/register", formData);
       setFormSuccess(`Usuário ${formData.name} criado com sucesso!`);
-      setFormData({ name: "", email: "", password: "", role: "TECNICO" });
+      setFormData({ name: "", email: "", password: "", role: "TÉCNICO" });
       fetchUsers();
     } catch (err) {
       setFormError(err.response?.data?.message || "Erro ao criar usuário.");
@@ -58,14 +58,31 @@ function UserManagementPage() {
       setIsSubmitting(false);
     }
   };
-  
+
+  /**
+   * ## Função handleDeleteUser
+   * * Esta função é responsável por excluir um usuário.
+   * Ela recebe o ID e o nome do usuário como parâmetros.
+   * * @param {string} userId - O ID do usuário a ser excluído.
+   * @param {string} userName - O nome do usuário para exibição na mensagem de confirmação.
+   */
   const handleDeleteUser = async (userId, userName) => {
+    
     if (window.confirm(`Tem certeza que deseja excluir o usuário ${userName}? Esta ação não pode ser desfeita.`)) {
       try {
+        
         await api.delete(`/auth/users/${userId}`);
-        fetchUsers(); // Atualiza a lista após a exclusão
+        
+        
+        fetchUsers(); 
+        
+        // Você pode adicionar uma mensagem de sucesso aqui, se desejar.
+        alert(`Usuário ${userName} excluído com sucesso!`);
+
       } catch (err) {
-        alert('Erro ao excluir usuário.');
+        // Se ocorrer um erro, exibe uma mensagem mais detalhada
+        const errorMessage = err.response?.data?.message || 'Erro ao excluir usuário. Tente novamente.';
+        alert(errorMessage);
       }
     }
   };

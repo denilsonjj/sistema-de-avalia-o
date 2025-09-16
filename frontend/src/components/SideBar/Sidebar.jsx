@@ -78,12 +78,16 @@ function Sidebar({ isMobileOpen, isDesktopCollapsed, onLinkClick, onCollapseClic
           )}
         </nav>
       </div>
-
+      <div className={styles.sidebarFooter}>
+      <p className={`${styles.footerText} ${isDesktopCollapsed ? styles.textCollapsed : ''}`}>
+        Desenvolvido por: Denilson Junior
+      </p>
       <button onClick={onCollapseClick} className={styles.collapseButton}>
         {isDesktopCollapsed ? '»' : '«'}
       </button>
-    </aside>
-  );
+    </div>
+  </aside>
+);
 }
 
 export default Sidebar;

@@ -93,3 +93,31 @@ body[data-theme='dark'] .activeLink {
   .sidebarOpen { transform: translateX(0); }
   .collapseButton { display: none; }
 }
+.sidebarFooter {
+  /* Garante que o rodapé fique no final, mesmo que os links não preencham a tela */
+  margin-top: auto; 
+  padding: 0.5rem 0 0 0;
+}
+
+.footerText {
+  font-size: 0.75rem; /* Tamanho pequeno e discreto */
+  color: var(--color-text-secondary, #888); /* Cor sutil */
+  text-align: center;
+  padding: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* O texto some junto com os outros textos quando a sidebar é recolhida */
+.footerText.textCollapsed {
+  opacity: 0;
+  height: 0;
+  padding: 0;
+}
+
+.collapseButton {
+  /* Pequeno ajuste para garantir consistência */
+  width: 100%;
+}

@@ -257,13 +257,11 @@ function GoalsPage() {
           <Box sx={{ display: "flex", gap: 2, alignItems: "center", width: "100%" }}>
             <TextField
               id="goal-title"
-              label="Adicionar nova meta"
-              variant="outlined"
+              placeholder="Adicionar Meta"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               size="small"
               fullWidth
-              inputProps={{ maxLength: 250 }}
             />
            <Button
             type="submit"
@@ -277,7 +275,7 @@ function GoalsPage() {
                 minWidth: '150px' 
             }} 
           >
-            {submitting ? "Salvando..." : "Adicionar Meta"} {/* Texto mais limpo */}
+            {submitting ? "Salvando..." : "Adicionar Meta"}
           </Button>
           </Box>
         </form>
