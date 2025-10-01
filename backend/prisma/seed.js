@@ -1,5 +1,3 @@
-// backend/prisma/seed.js
-
 const { PrismaClient } = require('@prisma/client');
 const fs = require('fs');
 const path = require('path');
@@ -9,7 +7,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Iniciando o script de seeding a partir do arquivo JSON...');
   const dataPath = path.join(__dirname, 'seed-data.json');
-
+  
   if (!fs.existsSync(dataPath)) {
     console.log('Arquivo seed-data.json não encontrado. Pulando o seeding de dados.');
     // Popula apenas as linhas de produção se o arquivo de dados não existir
@@ -47,8 +45,9 @@ async function main() {
   await prisma.feedback.deleteMany({});
   await prisma.goal.deleteMany({});
   await prisma.dailyOeeResult.deleteMany({});
-  // Desconectar usuários das linhas de produção antes de apagar
-  await prisma.user.updateMany({ data: { productionLines: { set: [] } } });
+  
+  // A linha com erro foi REMOVIDA daqui
+  
   await prisma.user.deleteMany({});
   await prisma.productionLine.deleteMany({});
 
@@ -59,7 +58,7 @@ async function main() {
       const { productionLines, ...userData } = user;
       await prisma.user.create({ data: userData });
   }
-
+  
   // Agora, conecta os usuários às suas linhas
   for (const userLineInfo of userProductionLines) {
       if (userLineInfo.productionLines.length > 0) {
@@ -90,6 +89,7 @@ async function main() {
   if (dailyOeeResults.length > 0) await prisma.dailyOeeResult.createMany({ data: parseDates(dailyOeeResults) });
 
   console.log('Seeding a partir do JSON concluído.');
+  console.log("teste feito")
 }
 
 main()
