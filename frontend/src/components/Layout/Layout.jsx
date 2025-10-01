@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Header from '../Header/Header';
-import Sidebar from '../Sidebar/Sidebar';
+import Sidebar from '../SideBar/Sidebar'; 
 import styles from './Layout.module.css';
 
 function Layout({ children }) {
