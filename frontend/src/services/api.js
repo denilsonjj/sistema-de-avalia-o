@@ -1,7 +1,10 @@
+// frontend/src/services/api.js
+
 import axios from 'axios';
 
+// A URL base agora virá da variável de ambiente
 const api = axios.create({
-  baseURL: `http://${window.location.hostname}:3001/api`, 
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
 });
 
 //tokens
