@@ -19,7 +19,7 @@ import ProfilePage from './pages/ProfilePage/ProfilePage.jsx';
 import ReportsPage from './pages/ReportsPage/ReportsPage';
 import AssignGoalPage from './pages/AssignGoalPage/AssignGoalPage.jsx';
 import ManageUserLinesPage from './pages/ManageUserLinesPage/ManageUserLinesPage.jsx';
-import TeamGoaslPage from './pages/TeamGoalsPage/TeamGoalsPage.jsx'
+import TeamGoalsPage from './pages/TeamGoalsPage/TeamGoalsPage.jsx'
 import 'react-datepicker/dist/react-datepicker.css';
 import './index.css';
 const router = createBrowserRouter([
@@ -88,7 +88,7 @@ const router = createBrowserRouter([
       },
       {
         path:'/metas-equipe',
-        element:  <ProtectedRoute><TeamGoaslPage/></ProtectedRoute> 
+element:  <ProtectedRoute><TeamGoalsPage/></ProtectedRoute>
       },
       {
         path: '/perfil',
