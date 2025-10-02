@@ -1,3 +1,5 @@
+// backend/controllers/oeeController.js - CÓDIGO CORRIGIDO
+
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const ExcelJS = require('exceljs');
@@ -16,6 +18,7 @@ exports.getOeeForUser = async (req, res) => {
 
         const lineNames = userWithLines.productionLines.map(line => line.name);
 
+        // Lógica aprimorada: busca pela data mais recente disponível
         const latestDateEntry = await prisma.dailyOeeResult.findFirst({
             orderBy: { date: 'desc' }
         });
@@ -27,10 +30,10 @@ exports.getOeeForUser = async (req, res) => {
         const oeeResults = await prisma.dailyOeeResult.findMany({
             where: {
                 lineDesc: { in: lineNames },
-                date: { equals: latestDateEntry.date }
+                date: { equals: latestDateEntry.date } // Usa a data mais recente encontrada
             }
         });
-        
+
         res.status(200).json(oeeResults);
     } catch (error) {
         res.status(500).json({ message: 'Erro ao buscar dados de OEE para o usuário.' });
@@ -40,42 +43,56 @@ exports.getOeeForUser = async (req, res) => {
 // Busca um resumo do OEE de todas as linhas para o dia mais recente
 exports.getOeeOverviewForAllLines = async (req, res) => {
     try {
-        const { datePreset = 'today', lines } = req.query;
+        let results = [];
 
+        // 1. Tenta buscar os dados do dia de hoje
         const today = new Date();
-        today.setHours(23, 59, 59, 999);
-        let startDate = new Date(today);
+        const startDate = new Date(today);
         startDate.setHours(0, 0, 0, 0);
-        
-        if (datePreset === 'last7days') {
-            startDate.setDate(today.getDate() - 6);
-        } else if (datePreset === 'last30days') {
-            startDate.setDate(today.getDate() - 29);
-        }
 
-        const whereClause = {
-            date: {
-                gte: startDate,
-                lte: today,
-            }
-        };
-
-        if (lines) {
-            whereClause.lineDesc = { in: lines.split(',') };
-        }
-
-        const results = await prisma.dailyOeeResult.findMany({
-            where: whereClause,
+        results = await prisma.dailyOeeResult.findMany({
+            where: {
+                date: {
+                    gte: startDate,
+                    lte: today,
+                }
+            },
         });
 
+        // 2. Se não encontrou nada para hoje, busca pela data mais recente disponível no banco
+        if (results.length === 0) {
+            console.log("Nenhum dado de OEE para hoje. Buscando a data mais recente disponível...");
+            const latestEntry = await prisma.dailyOeeResult.findFirst({
+                orderBy: { date: 'desc' }
+            });
+
+            if (latestEntry) {
+                const latestDate = new Date(latestEntry.date);
+                const startOfLatestDate = new Date(latestDate);
+                startOfLatestDate.setHours(0, 0, 0, 0);
+                const endOfLatestDate = new Date(latestDate);
+                endOfLatestDate.setHours(23, 59, 59, 999);
+
+                results = await prisma.dailyOeeResult.findMany({
+                    where: {
+                        date: {
+                            gte: startOfLatestDate,
+                            lte: endOfLatestDate,
+                        }
+                    },
+                });
+            }
+        }
+
+        // O resto da lógica para processar os 'results' continua a mesma
         const overviewByLine = results.reduce((acc, curr) => {
             if (!acc[curr.lineDesc]) {
                 acc[curr.lineDesc] = { count: 0, availability: 0, performance: 0, quality: 0 };
             }
             acc[curr.lineDesc].count++;
-            acc[curr.lineDesc].availability += curr.availability;
-            acc[curr.lineDesc].performance += curr.performance;
-            acc[curr.lineDesc].quality += curr.quality;
+            acc[curr.lineDesc].availability += curr.availability || 0;
+            acc[curr.lineDesc].performance += curr.performance || 0;
+            acc[curr.lineDesc].quality += curr.quality || 0;
             return acc;
         }, {});
 
@@ -102,7 +119,7 @@ exports.getOeeOverviewForAllLines = async (req, res) => {
     }
 };
 
-// Exportar overview de OEE para Excel (com data e turno)
+// A função de exportação permanece a mesma
 exports.exportOeeOverview = async (req, res) => {
   try {
     const latestDateEntry = await prisma.dailyOeeResult.findFirst({
@@ -113,16 +130,14 @@ exports.exportOeeOverview = async (req, res) => {
         return res.status(404).json({ message: "Nenhum dado de OEE encontrado para exportar." });
     }
 
-    // Busca todos os resultados da data mais recente, sem agrupar
     const results = await prisma.dailyOeeResult.findMany({
         where: { date: { equals: latestDateEntry.date } },
         orderBy: [{ lineDesc: 'asc' }, { shift: 'asc' }]
     });
-    
+
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('OEE_Planta_Detalhado');
 
-    // Adiciona as novas colunas
     worksheet.columns = [
       { header: 'Data', key: 'date', width: 20 },
       { header: 'Linha de Produção', key: 'name', width: 30 },
@@ -133,7 +148,6 @@ exports.exportOeeOverview = async (req, res) => {
       { header: 'Qualidade (%)', key: 'quality', width: 15 },
     ];
 
-    // Adiciona uma linha para cada registro individual
     results.forEach(line => {
       worksheet.addRow({
           date: new Date(line.date).toLocaleDateString('pt-BR'),
