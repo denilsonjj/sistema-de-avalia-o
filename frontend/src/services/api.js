@@ -1,15 +1,17 @@
+// frontend/src/services/api.js - VERSÃO FINAL COM SUA URL
+
 import axios from 'axios';
 
-// Pega a URL da variável de ambiente.
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// URL do seu backend no Render
+const RENDER_BACKEND_URL = 'https://sistema-de-avalia-o.onrender.com/api'; 
 
-// Log para depuração: Isso aparecerá no console do seu navegador.
-console.log(`API baseURL está configurada para: ${baseURL}`);
+console.log(`Conectando à API em: ${RENDER_BACKEND_URL}`);
 
 const api = axios.create({
-  baseURL: baseURL,
+  baseURL: RENDER_BACKEND_URL,
 });
 
+// O resto do código permanece o mesmo
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('authToken');
